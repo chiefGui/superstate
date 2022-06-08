@@ -13,8 +13,12 @@
     "lib": ["es2017", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@superstate/core": ["packages/core/src/index.ts"],
+      "@superstate/react": ["packages/react/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

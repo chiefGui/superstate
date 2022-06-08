@@ -1,0 +1,7 @@
+{
+  "name": "@superstate/core",
+  "version": "0.0.1",
+  "dependencies": {
+    "fast-deep-equal": "^3.1.3"
+  }
+}
