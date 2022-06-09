@@ -1,4 +1,4 @@
-import * as deepEqual from 'fast-deep-equal'
+import deepEqual from 'fast-deep-equal'
 
 /**
  * The superstate function. This is the function that you should use to create a superstate.

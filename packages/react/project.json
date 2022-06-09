@@ -3,6 +3,12 @@
   "sourceRoot": "packages/react/src",
   "projectType": "library",
   "targets": {
+    "build": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "yarn ts-node tools/scripts/build.ts react jsx"
+      }
+    },
     "release": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {

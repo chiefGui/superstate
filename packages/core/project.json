@@ -3,10 +3,16 @@
   "sourceRoot": "packages/core/src",
   "projectType": "library",
   "targets": {
+    "build": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "yarn ts-node tools/scripts/build.ts core"
+      }
+    },
     "release": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "command": "yarn ts-node tools/scripts/release.ts react jsx"
+        "command": "yarn ts-node tools/scripts/release.ts core"
       }
     },
     "lint": {

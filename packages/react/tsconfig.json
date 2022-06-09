@@ -1,6 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "../../dist",
     "module": "commonjs",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
