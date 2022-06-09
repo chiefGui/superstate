@@ -20,7 +20,7 @@ permissions:
   issues: write
   contents: write
   actions: write
-  packages: none
+  packages: write
   deployments: write
   statuses: write
 
@@ -43,6 +43,7 @@ jobs:
       with:
         node-version: 16
         registry-url: https://registry.npmjs.org/
+        scope: "@superstate"
 
     - name: Nx set SHAs
       uses: nrwl/nx-set-shas@v2.0.2
