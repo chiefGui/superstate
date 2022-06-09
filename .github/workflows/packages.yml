@@ -14,7 +14,7 @@ on:
       - main
 
 jobs:
-  main:
+  packages:
     runs-on: ubuntu-latest
 
     permissions:
@@ -30,6 +30,12 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+        registry-url: https://registry.npmjs.org/
+
     - name: Nx set SHAs
       uses: nrwl/nx-set-shas@v2.0.2
 
@@ -44,3 +50,8 @@ jobs:
 
     - name: Build
       run: npx nx affected --target=build --parallel=3
+
+    - name: Publish
+      run: npx nx affected --target=publish --parallel=3
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
