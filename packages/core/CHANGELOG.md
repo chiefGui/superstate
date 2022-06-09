@@ -1,5 +1,11 @@
 # @superstate/core
 
+## 0.0.8
+
+### Patch Changes
+
+- Document IDraft
+
 ## 0.0.7
 
 ### Patch Changes

@@ -251,6 +251,11 @@ export interface ISuperStateDraftMethods<S> {
   set: (input: ISetInput<S>, broadcast?: boolean) => ISuperStateDraftMethods<S>
 }
 
+/**
+ * The type of the draft.
+ * Almost the same thing as the state,
+ * except it can be `undefined`.
+ */
 export type IDraft<S> = S | undefined
 
 type ISetInput<S> = ((prev: S) => S) | S
