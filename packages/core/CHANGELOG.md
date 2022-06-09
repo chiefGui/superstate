@@ -1,5 +1,11 @@
 # @superstate/core
 
+## 0.0.7
+
+### Patch Changes
+
+- 3a8d304: Approach release once more
+
 ## 0.0.6
 
 ### Patch Changes

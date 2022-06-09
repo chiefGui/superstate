@@ -1,5 +1,14 @@
 # @superstate/react
 
+## 0.0.9
+
+### Patch Changes
+
+- 3a8d304: Approach release once more
+- 67749fd: Add documentation to useSuperState `target`.
+- Updated dependencies [3a8d304]
+  - @superstate/core@0.0.7
+
 ## 0.0.8
 
 ### Patch Changes
