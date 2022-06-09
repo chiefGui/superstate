@@ -13,6 +13,8 @@ on:
     branches:
       - main
 
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   packages:
     runs-on: ubuntu-latest
@@ -48,10 +50,11 @@ jobs:
     - name: Test
       run: npx nx affected --target=test --parallel=3
 
-    - name: Build
-      run: npx nx affected --target=build --parallel=3
-
-    - name: Publish
-      run: npx nx affected --target=publish --parallel=3
+    - name: Create Release Pull Request or Publish to npm
+      id: changesets
+      uses: changesets/action@v1
+      with:
+        publish: npx nx affected --target=publish --parallel=3
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -18,6 +18,7 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.22.0",
     "@docusaurus/module-type-aliases": "2.0.0-beta.13",
     "@nrwl/cli": "^14.2.4",
     "@nrwl/cypress": "^14.2.4",
