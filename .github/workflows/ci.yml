@@ -17,6 +17,10 @@ jobs:
   main:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: 'read'
+      actions: 'write'
+
     strategy:
       matrix:
         node-version: [16.x]
