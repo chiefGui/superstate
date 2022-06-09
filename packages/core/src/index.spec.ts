@@ -78,27 +78,26 @@ describe('superstate', () => {
     })
   })
 
-  describe('helpers', () => {
-    test('changes the draft based on an immutable helper', () => {
-      const count = superstate(5, { sum: (prev, num: number) => prev + num })
+  describe('extensions', () => {
+    test('changes the draft based on now', () => {
+      const count = superstate(5).extend({
+        sum: ({ now }, num: number) => now + num,
+      })
 
       count.sum(5)
 
       expect(count.draft()).toBe(10)
     })
 
-    test('changes the draft based on a mutable helper', () => {
-      const count = superstate(5, {
-        sum: (prev, num: number) => {
-          prev += num
-
-          return prev
-        },
+    test('changes the draft based on prev draft', () => {
+      const count = superstate(5).extend({
+        sum: ({ now, draft }, num: number) => (draft ?? now) + num,
       })
 
+      count.set(10)
       count.sum(5)
 
-      expect(count.draft()).toBe(10)
+      expect(count.draft()).toBe(15)
     })
   })
 

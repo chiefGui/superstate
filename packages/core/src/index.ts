@@ -7,10 +7,7 @@ import * as deepEqual from 'fast-deep-equal'
  * @param helpers
  * @returns Methods to work with your state.
  */
-export function superstate<
-  S,
-  M extends Record<string, (...params: [S, ...any[]]) => IHelperReturn<S>>
->(initialState: S, helpers?: M) {
+export function superstate<S>(initialState: S) {
   let _now = initialState
   let _draft: IDraft<S> = undefined
 
@@ -40,7 +37,7 @@ export function superstate<
    * @param input It can be a raw value or a function whose first and sole argument is the value of the previous `draft`. In case there is no previous draft, the first argument will be the previous value of `now`.
    */
   function set(input: ISetInput<S>) {
-    const clone = cloneState(_draft || _now)
+    const clone = cloneObj(_draft || _now)
 
     _draft = isMutator(input) ? input(clone) : input
 
@@ -119,6 +116,20 @@ export function superstate<
     _draftSubscribers = []
   }
 
+  function extend<M extends IExtensions<S>>(extensions: M) {
+    return {
+      now,
+      draft,
+      set,
+      publish,
+      subscribe,
+      discard,
+      unsubscribeAll,
+
+      ..._prepareExtensions(extensions),
+    }
+  }
+
   function _broadcast() {
     _subscribers.forEach((s) => {
       s(_now)
@@ -127,34 +138,6 @@ export function superstate<
 
   function _broadcastDraft() {
     _draftSubscribers.forEach((ds) => ds(_draft))
-  }
-
-  function _preparehelpers() {
-    if (!helpers) {
-      return {} as { [key in keyof M]: () => void }
-    }
-
-    return Object.keys(helpers).reduce(
-      (prev, helperKey) => {
-        return {
-          ...prev,
-          [helperKey]: (...args: any[]) => {
-            const result = helpers[helperKey](cloneState(_now), ...args)
-
-            if (typeof result === 'undefined') {
-              return
-            }
-
-            set(result)
-          },
-        }
-      },
-      {} as {
-        [key in keyof M]: (
-          ...params: DropFirst<Parameters<M[key]>>
-        ) => IHelperReturn<S>
-      }
-    )
   }
 
   function _subscribeDraft(subscriber: ISubscriber<IDraft<S>>) {
@@ -169,6 +152,44 @@ export function superstate<
       ])
   }
 
+  function _prepareExtensions<M extends IExtensions<S>>(extensions: M) {
+    if (!extensions) {
+      return {} as { [key in keyof M]: () => void }
+    }
+
+    return Object.keys(extensions).reduce(
+      (prev, extensionKey) => {
+        return {
+          ...prev,
+          [extensionKey]: (...params: IExtensionUserParams) => {
+            const result: IExtensionOutput<S> = extensions[extensionKey](
+              _getExtensionProps(),
+              ...params
+            )
+
+            if (typeof result === 'undefined') {
+              return
+            }
+
+            set(result)
+          },
+        }
+      },
+      {} as {
+        [key in keyof M]: (
+          ...params: DropFirst<Parameters<M[key]>>
+        ) => IExtensionOutput<S>
+      }
+    )
+  }
+
+  function _getExtensionProps(): IExtensionProps<S> {
+    return {
+      draft: cloneObj(_draft),
+      now: cloneObj(_now),
+    }
+  }
+
   return {
     now,
     draft,
@@ -176,9 +197,8 @@ export function superstate<
     discard,
     publish,
     subscribe,
+    extend,
     unsubscribeAll,
-
-    ..._preparehelpers(),
   }
 }
 
@@ -187,15 +207,24 @@ export interface ISuperState<S> {
   draft: () => IDraft<S>
   discard: () => void
   publish: () => void
-  subscribe: (subscriber: ISubscriber<S>) => () => ISubscriber<S>[]
-  subscribeDraft: (
-    subscriber: ISubscriber<IDraft<S>>
-  ) => () => ISubscriber<IDraft<S>>[]
+  subscribe: (
+    subscriber: ISubscriber<S>,
+    target?: 'draft' | 'now' | undefined
+  ) => (() => ISubscriber<S>[]) | undefined
 }
 
 export type IDraft<S> = S | undefined
 
-function cloneState<S>(inputState: S) {
+export enum EEventType {
+  BeforeSet = 'BeforeSet',
+  AfterSet = 'AfterSet',
+}
+
+function cloneObj<S>(inputState: S) {
+  if (inputState === undefined) {
+    return undefined
+  }
+
   if (inputState instanceof Map) {
     return new Map(inputState)
   }
@@ -214,4 +243,12 @@ function isMutator<S>(value: ISetInput<S>): value is (prev: S) => S {
 type ISetInput<S> = ((prev: S) => S) | S
 type ISubscriber<S> = (newState: S) => void
 type DropFirst<T extends unknown[]> = T extends [any, ...infer U] ? U : never
-type IHelperReturn<S> = S | void | undefined
+type IExtensionOutput<S> = S | void | undefined
+type IExtensionProps<S> = {
+  draft: IDraft<S>
+  now: S
+}
+type IExtensionUserParams = any[]
+type IExtensionAllParams<S> = [IExtensionProps<S>, ...IExtensionUserParams]
+type IExtension<S> = (...params: IExtensionAllParams<S>) => IExtensionOutput<S>
+type IExtensions<S> = Record<string, IExtension<S>>
