@@ -1,6 +1,6 @@
 {
   "name": "@superstate/react",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "superstate for React apps",
   "main": "src/index.ts",
   "publishConfig": {
@@ -19,7 +19,7 @@
     "directory": "packages/react"
   },
   "dependencies": {
-    "@superstate/core": "^0.0.8"
+    "@superstate/core": "^0.0.9"
   },
   "peerDependencies": {
     "react": "^18.1.0",
