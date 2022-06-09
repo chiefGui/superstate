@@ -15,8 +15,6 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
-
-
 permissions:
   pull-requests: write
   issues: write
