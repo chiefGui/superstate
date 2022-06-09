@@ -34,7 +34,7 @@ jobs:
       uses: nrwl/nx-set-shas@v2.0.2
 
     - name: Install dependencies
-      run: npm install --frozen-lockfile
+      run: yarn install --frozen-lockfile
 
     - name: Lint
       run: npx nx affected --target=lint --parallel=3
