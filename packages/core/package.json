@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/core"
+    "directory": "../../dist/packages/core",
+    "registry": "https://registry.npmjs.org"
   },
   "license": "MIT",
   "author": {

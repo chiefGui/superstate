@@ -3,6 +3,9 @@
   "description": "superstate monorepo",
   "version": "0.0.0",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
   "scripts": {
     "build:core": "nx build core --configuration=production",
     "test:core": "nx test core"

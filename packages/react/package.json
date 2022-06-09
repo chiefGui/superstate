@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/react"
+    "directory": "../../dist/packages/react",
+    "registry": "https://registry.npmjs.org"
   },
   "license": "MIT",
   "author": {
