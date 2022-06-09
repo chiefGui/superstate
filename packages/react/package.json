@@ -1,18 +1,11 @@
 {
   "name": "@superstate/react",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "superstate for React apps",
   "main": "src/index.ts",
-  "keywords": [
-    "state",
-    "state management",
-    "global state",
-    "data",
-    "react state management",
-    "react state"
-  ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "../../dist/packages/react"
   },
   "license": "MIT",
   "author": {
@@ -30,5 +23,13 @@
   "peerDependencies": {
     "react": "^18.1.0",
     "react-dom": "^18.1.0"
-  }
+  },
+  "keywords": [
+    "state",
+    "state management",
+    "global state",
+    "data",
+    "react state management",
+    "react state"
+  ]
 }

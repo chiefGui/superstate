@@ -3,23 +3,11 @@
   "sourceRoot": "packages/react/src",
   "projectType": "library",
   "targets": {
-    "build": {
+    "release": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "command": "yarn ts-node tools/scripts/build.ts react jsx"
+        "command": "yarn ts-node tools/scripts/release.ts react jsx"
       }
-    },
-    "publish": {
-      "executor": "@nrwl/workspace:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs react {args.ver} {args.tag}"
-      },
-      "dependsOn": [
-        {
-          "projects": "self",
-          "target": "build"
-        }
-      ]
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",

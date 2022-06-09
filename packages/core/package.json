@@ -3,16 +3,9 @@
   "version": "0.0.4",
   "description": "The essential package for superstate, the state management library.",
   "main": "src/index.ts",
-  "keywords": [
-    "state",
-    "state management",
-    "global state",
-    "data",
-    "react state management",
-    "react state"
-  ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "../../dist/packages/core"
   },
   "license": "MIT",
   "author": {
@@ -26,5 +19,13 @@
   },
   "dependencies": {
     "fast-deep-equal": "^3.1.3"
-  }
+  },
+  "keywords": [
+    "state",
+    "state management",
+    "global state",
+    "data",
+    "react state management",
+    "react state"
+  ]
 }
