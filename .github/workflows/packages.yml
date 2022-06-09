@@ -56,7 +56,7 @@ jobs:
     - name: Test
       run: npx nx affected --target=test --parallel=3
 
-    - name: Create Release Pull Request or Publish to npm
+    - name: Create Release Pull Request
       id: changesets
       uses: changesets/action@v1
       with:
