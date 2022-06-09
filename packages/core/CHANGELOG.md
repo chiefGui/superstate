@@ -1,5 +1,11 @@
 # @superstate/core
 
+## 0.0.9
+
+### Patch Changes
+
+- cb780e6: test
+
 ## 0.0.8
 
 ### Patch Changes

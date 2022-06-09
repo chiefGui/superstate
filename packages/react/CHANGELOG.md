@@ -1,5 +1,13 @@
 # @superstate/react
 
+## 0.0.15
+
+### Patch Changes
+
+- cb780e6: test
+- Updated dependencies [cb780e6]
+  - @superstate/core@0.0.9
+
 ## 0.0.14
 
 ### Patch Changes
