@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  repository_dispatch:
+    branches:
+      - main
+
+  push:
+    paths:
+      - packages/core/**
+      - packages/react/**
+
+    branches:
+      - main
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: nrwl/nx-set-shas@v2
+    - run: npm ci
+
+    - run: npx nx affected --target=lint --parallel=3
+    - run: npx nx affected --target=test --parallel=3
+    - run: npx nx affected --target=build --parallel=3
