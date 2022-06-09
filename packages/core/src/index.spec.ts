@@ -34,6 +34,22 @@ describe('superstate', () => {
 
       expect(count.draft()).toBe(20)
     })
+
+    test('assigns the value to the draft without broadcasting changes', () => {
+      const count = superstate(0)
+
+      const subscriber = jest.fn()
+      count.subscribe(subscriber, 'draft')
+
+      count.set(5, true)
+      expect(subscriber).toHaveBeenCalledTimes(1)
+
+      count.set(5, true)
+      expect(subscriber).toHaveBeenCalledTimes(2)
+
+      count.set(5, false)
+      expect(subscriber).toHaveBeenCalledTimes(2)
+    })
   })
 
   describe('publish', () => {
@@ -136,6 +152,20 @@ describe('superstate', () => {
 
       count.set(5)
 
+      expect(sub).toHaveBeenCalledTimes(1)
+    })
+
+    test('stop reacting when unsubscribe', () => {
+      const count = superstate(0)
+
+      const sub = jest.fn()
+
+      const unsub = count.subscribe(sub, 'draft')
+      count.set(5)
+      expect(sub).toHaveBeenCalledTimes(1)
+
+      unsub()
+      count.set(5)
       expect(sub).toHaveBeenCalledTimes(1)
     })
   })

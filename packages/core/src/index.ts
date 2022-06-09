@@ -35,13 +35,14 @@ export function superstate<S>(initialState: S) {
    * This function won't broadcast a draft change if the previous value is equal to the new value.
    *
    * @param input It can be a raw value or a function whose first and sole argument is the value of the previous `draft`. In case there is no previous draft, the first argument will be the previous value of `now`.
+   * @param broadcast (default: `true`) Whether to broadcast the change.
    */
-  function set(input: ISetInput<S>) {
+  function set(input: ISetInput<S>, broadcast = true) {
     const clone = cloneObj(_draft || _now)
 
     _draft = isMutator(input) ? input(clone) : input
 
-    if (!deepEqual(_draft, _now)) {
+    if (broadcast && !deepEqual(_draft, _now)) {
       _broadcastDraft()
     }
   }
@@ -59,7 +60,7 @@ export function superstate<S>(initialState: S) {
     const prev = _now
 
     if (input) {
-      set(input)
+      set(input, false)
     }
 
     _now = _draft as S
@@ -78,10 +79,12 @@ export function superstate<S>(initialState: S) {
    * @param target Can be either `now` or `draft` (default: `now`)
    * @returns
    */
-  function subscribe(subscriber: ISubscriber<S>, target?: 'draft' | 'now') {
+  function subscribe(
+    subscriber: ISubscriber<S>,
+    target?: 'draft' | 'now'
+  ): IUnsubscribe {
     if (target === 'draft') {
-      _subscribeDraft(subscriber as ISubscriber<IDraft<S>>)
-      return
+      return _subscribeDraft(subscriber as ISubscriber<IDraft<S>>)
     }
 
     const nextIndex = _subscribers.length
@@ -202,24 +205,6 @@ export function superstate<S>(initialState: S) {
   }
 }
 
-export interface ISuperState<S> {
-  now: () => S
-  draft: () => IDraft<S>
-  discard: () => void
-  publish: () => void
-  subscribe: (
-    subscriber: ISubscriber<S>,
-    target?: 'draft' | 'now' | undefined
-  ) => (() => ISubscriber<S>[]) | undefined
-}
-
-export type IDraft<S> = S | undefined
-
-export enum EEventType {
-  BeforeSet = 'BeforeSet',
-  AfterSet = 'AfterSet',
-}
-
 function cloneObj<S>(inputState: S) {
   if (inputState === undefined) {
     return undefined
@@ -236,13 +221,33 @@ function cloneObj<S>(inputState: S) {
   return JSON.parse(JSON.stringify(inputState))
 }
 
+export interface ISuperState<S> {
+  now: () => S
+  draft: () => IDraft<S>
+  discard: () => void
+  publish: () => void
+  subscribe: (
+    subscriber: ISubscriber<S>,
+    target?: 'draft' | 'now' | undefined
+  ) => IUnsubscribe
+}
+
+export type IDraft<S> = S | undefined
+
+export enum EEventType {
+  BeforeSet = 'BeforeSet',
+  AfterSet = 'AfterSet',
+}
+
 function isMutator<S>(value: ISetInput<S>): value is (prev: S) => S {
   return typeof value === 'function'
 }
 
 type ISetInput<S> = ((prev: S) => S) | S
 type ISubscriber<S> = (newState: S) => void
+
 type DropFirst<T extends unknown[]> = T extends [any, ...infer U] ? U : never
+
 type IExtensionOutput<S> = S | void | undefined
 type IExtensionProps<S> = {
   draft: IDraft<S>
@@ -252,3 +257,5 @@ type IExtensionUserParams = any[]
 type IExtensionAllParams<S> = [IExtensionProps<S>, ...IExtensionUserParams]
 type IExtension<S> = (...params: IExtensionAllParams<S>) => IExtensionOutput<S>
 type IExtensions<S> = Record<string, IExtension<S>>
+
+type IUnsubscribe = () => void
