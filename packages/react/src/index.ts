@@ -6,6 +6,7 @@ import { IDraft, ISuperState } from '@superstate/core'
  * A React hook that rerenders the component when
  * a superstate changes.
  *
+ *
  * @param ss - The `superstate` instance.
  * @param options.target - (default: `undefined`) The target to monitor. If not specified, whenever either `now` or `draft` changes, the component will rerender.
  *
