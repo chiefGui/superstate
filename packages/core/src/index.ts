@@ -188,7 +188,12 @@ export interface ISuperState<S> extends ISuperStateDraftMethods<S> {
   now: () => S
 
   /**
+   * Extends superstate with additional methods.
    *
+   * Note: Currently only extensions that mutates the draft are supported.
+   *
+   * @param IExtension The extensions to add.
+   * @returns The extended superstate.
    */
   extend: <E extends IExtensions<S>>(
     extensions: E
