@@ -1,5 +1,13 @@
 # @superstate/react
 
+## 0.0.16
+
+### Patch Changes
+
+- dac7153: test
+- Updated dependencies [dac7153]
+  - @superstate/core@0.0.10
+
 ## 0.0.15
 
 ### Patch Changes
