@@ -1,5 +1,11 @@
 # @superstate/core
 
+## 0.0.10
+
+### Patch Changes
+
+- dac7153: test
+
 ## 0.0.9
 
 ### Patch Changes
