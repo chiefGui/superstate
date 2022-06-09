@@ -1,6 +1,29 @@
 {
   "name": "@superstate/core",
-  "version": "0.0.1",
+  "version": "0.0.3",
+  "description": "The essential package for superstate, the state management library.",
+  "main": "src/index.ts",
+  "keywords": [
+    "state",
+    "state management",
+    "global state",
+    "data",
+    "react state management",
+    "react state"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Guilherme \"chiefGui\" Oderdenge"
+  },
+  "bugs": "https://github.com/chiefGui/superstate",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chiefGui/superstate.git",
+    "directory": "packages/core"
+  },
   "dependencies": {
     "fast-deep-equal": "^3.1.3"
   }

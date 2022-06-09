@@ -5,6 +5,8 @@ dist
 /tmp
 /out-tsc
 
+.npmrc
+
 # dependencies
 node_modules
 

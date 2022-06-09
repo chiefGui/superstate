@@ -50,6 +50,23 @@ describe('superstate', () => {
       count.set(5, false)
       expect(subscriber).toHaveBeenCalledTimes(2)
     })
+
+    test('assigns the value to the draft and publish in chain', () => {
+      const count = superstate(0)
+
+      count.set(5).publish()
+
+      expect(count.now()).toBe(5)
+    })
+
+    test('assigns the value to the draft and discard in chain', () => {
+      const count = superstate(0)
+
+      count.set(5).discard()
+
+      expect(count.draft()).toBeUndefined()
+      expect(count.now()).toBe(0)
+    })
   })
 
   describe('publish', () => {
@@ -100,9 +117,9 @@ describe('superstate', () => {
         sum: ({ now }, num: number) => now + num,
       })
 
-      count.sum(5)
+      count.sum(10)
 
-      expect(count.draft()).toBe(10)
+      expect(count.draft()).toBe(15)
     })
 
     test('changes the draft based on prev draft', () => {

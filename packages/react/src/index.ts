@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react'
 import { IDraft, ISuperState } from '@superstate/core'
 
 export function useSuperState<S>(
-  ss: ISuperState<S>,
-  options: IUseSuperStateOptions = { target: 'both' }
+  ss: Pick<ISuperState<S>, 'subscribe' | 'now' | 'draft'>,
+  options?: IUseSuperStateOptions
 ) {
   const [, setNow] = useState<S>(ss.now())
   const [, setDraft] = useState<IDraft<S>>(ss.draft())
@@ -12,12 +12,12 @@ export function useSuperState<S>(
   useEffect((): (() => void) => {
     const unsubs: (() => void)[] = []
 
-    if (options.target === 'both' || options.target === 'now') {
+    if (!options?.target || options.target === 'now') {
       unsubs.push(ss.subscribe(setNow))
     }
 
-    if (options.target === 'both' || options.target === 'draft') {
-      unsubs.push(ss.subscribeDraft(setDraft))
+    if (!options?.target || options.target === 'draft') {
+      unsubs.push(ss.subscribe(setDraft, 'draft'))
     }
 
     return () => {
@@ -29,5 +29,5 @@ export function useSuperState<S>(
 }
 
 interface IUseSuperStateOptions {
-  target: 'now' | 'draft' | 'both'
+  target: 'now' | 'draft'
 }

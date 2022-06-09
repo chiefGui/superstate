@@ -4,39 +4,39 @@ import * as deepEqual from 'fast-deep-equal'
  * The superstate function. This is the function that you should use to create a superstate.
  *
  * @param initialState The initial state.
- * @param helpers
- * @returns Methods to work with your state.
+ * @returns Methods (`ISuperState`) to work with your state.
  */
-export function superstate<S>(initialState: S) {
+export function superstate<S>(initialState: S): ISuperState<S> {
   let _now = initialState
   let _draft: IDraft<S> = undefined
 
   let _subscribers: ISubscriber<S>[] = []
   let _draftSubscribers: ISubscriber<IDraft<S>>[] = []
 
-  /**
-   * @returns The current state.
-   */
+  const _draftMethods: ISuperStateDraftMethods<S> = {
+    draft,
+    set,
+    publish,
+    discard,
+  }
+
+  const _methods: ISuperState<S> = {
+    ..._draftMethods,
+
+    now,
+    subscribe,
+    extend,
+    unsubscribeAll,
+  }
+
   function now() {
     return _now
   }
 
-  /**
-   *
-   * @returns The current draft.
-   */
   function draft() {
     return _draft
   }
 
-  /**
-   * Sets the value passed through `input` to the draft.
-   *
-   * This function won't broadcast a draft change if the previous value is equal to the new value.
-   *
-   * @param input It can be a raw value or a function whose first and sole argument is the value of the previous `draft`. In case there is no previous draft, the first argument will be the previous value of `now`.
-   * @param broadcast (default: `true`) Whether to broadcast the change.
-   */
   function set(input: ISetInput<S>, broadcast = true) {
     const clone = cloneObj(_draft || _now)
 
@@ -45,13 +45,10 @@ export function superstate<S>(initialState: S) {
     if (broadcast && !deepEqual(_draft, _now)) {
       _broadcastDraft()
     }
+
+    return _draftMethods
   }
 
-  /**
-   * Publishes the draft, setting the value of `now` to be the same as the draft and discarding the draft.
-   *
-   * It won't broadcast any changes if the previous value is equal to the new value.
-   */
   function publish(input?: ISetInput<S>) {
     if (!input && typeof _draft === 'undefined') {
       return
@@ -72,13 +69,6 @@ export function superstate<S>(initialState: S) {
     }
   }
 
-  /**
-   * Starts monitoring changes to the state.
-   *
-   * @param subscriber A function that will be called when `now` or `draft` changes (depends on `target`).
-   * @param target Can be either `now` or `draft` (default: `now`)
-   * @returns
-   */
   function subscribe(
     subscriber: ISubscriber<S>,
     target?: 'draft' | 'now'
@@ -98,38 +88,51 @@ export function superstate<S>(initialState: S) {
       ])
   }
 
-  /**
-   * Discards the draft, setting its value to `undefined`.
-   *
-   * Upon calling this function, a draft broadcast will occur.
-   */
   function discard() {
     _draft = undefined
     _broadcastDraft()
   }
 
-  /**
-   * Unsubscribes all `now` and `draft` subscribers.
-   *
-   * After you call this method, changes will no longer be
-   * broadcasted.
-   */
   function unsubscribeAll() {
     _subscribers = []
     _draftSubscribers = []
   }
 
-  function extend<M extends IExtensions<S>>(extensions: M) {
-    return {
-      now,
-      draft,
-      set,
-      publish,
-      subscribe,
-      discard,
-      unsubscribeAll,
+  function extend<E extends IExtensions<S>>(
+    extensions: E
+  ): ISuperState<S> & IExtensionMethods<S, E> {
+    return { ..._methods, ..._prepareExtensions(extensions) }
+  }
 
-      ..._prepareExtensions(extensions),
+  function _prepareExtensions<E extends IExtensions<S>>(
+    extensions: E
+  ): IExtensionMethods<S, E> {
+    return Object.keys(extensions).reduce((prev, extensionKey) => {
+      return {
+        ...prev,
+
+        [extensionKey]: (...params: IExtensionUserParams) => {
+          const result: IExtensionOutput<S> = extensions[extensionKey](
+            _getExtensionProps(),
+            ...params
+          )
+
+          if (typeof result === 'undefined') {
+            return
+          }
+
+          set(result)
+
+          return _draftMethods
+        },
+      }
+    }, {} as IExtensionMethods<S, E>)
+  }
+
+  function _getExtensionProps(): IExtensionProps<S> {
+    return {
+      draft: cloneObj(_draft),
+      now: cloneObj(_now),
     }
   }
 
@@ -155,54 +158,7 @@ export function superstate<S>(initialState: S) {
       ])
   }
 
-  function _prepareExtensions<M extends IExtensions<S>>(extensions: M) {
-    if (!extensions) {
-      return {} as { [key in keyof M]: () => void }
-    }
-
-    return Object.keys(extensions).reduce(
-      (prev, extensionKey) => {
-        return {
-          ...prev,
-          [extensionKey]: (...params: IExtensionUserParams) => {
-            const result: IExtensionOutput<S> = extensions[extensionKey](
-              _getExtensionProps(),
-              ...params
-            )
-
-            if (typeof result === 'undefined') {
-              return
-            }
-
-            set(result)
-          },
-        }
-      },
-      {} as {
-        [key in keyof M]: (
-          ...params: DropFirst<Parameters<M[key]>>
-        ) => IExtensionOutput<S>
-      }
-    )
-  }
-
-  function _getExtensionProps(): IExtensionProps<S> {
-    return {
-      draft: cloneObj(_draft),
-      now: cloneObj(_now),
-    }
-  }
-
-  return {
-    now,
-    draft,
-    set,
-    discard,
-    publish,
-    subscribe,
-    extend,
-    unsubscribeAll,
-  }
+  return _methods
 }
 
 function cloneObj<S>(inputState: S) {
@@ -221,27 +177,76 @@ function cloneObj<S>(inputState: S) {
   return JSON.parse(JSON.stringify(inputState))
 }
 
-export interface ISuperState<S> {
+function isMutator<S>(value: ISetInput<S>): value is (prev: S) => S {
+  return typeof value === 'function'
+}
+
+export interface ISuperState<S> extends ISuperStateDraftMethods<S> {
+  /**
+   * @returns The current state.
+   */
   now: () => S
-  draft: () => IDraft<S>
-  discard: () => void
-  publish: () => void
+
+  /**
+   *
+   */
+  extend: <E extends IExtensions<S>>(
+    extensions: E
+  ) => ISuperState<S> & IExtensionMethods<S, E>
+
+  /**
+   * Starts monitoring changes to the state.
+   *
+   * @param subscriber A function that will be called when `now` or `draft` changes (depends on `target`).
+   * @param target Can be either `now` or `draft` (default: `now`)
+   * @returns A function to unsubscribe.
+   */
   subscribe: (
     subscriber: ISubscriber<S>,
     target?: 'draft' | 'now' | undefined
   ) => IUnsubscribe
+
+  /**
+   * Unsubscribes all `now` and `draft` subscribers.
+   *
+   * After you call this method, changes will no longer be
+   * broadcasted.
+   */
+  unsubscribeAll: () => void
+}
+
+export interface ISuperStateDraftMethods<S> {
+  /**
+   * @returns The current draft.
+   */
+  draft: () => IDraft<S>
+
+  /**
+   * Discards the draft, setting its value to `undefined`.
+   *
+   * Upon calling this function, a draft broadcast will occur.
+   */
+  discard: () => void
+
+  /**
+   * Publishes the draft, setting the value of `now` to be the same as the draft and discarding the draft.
+   *
+   * It won't broadcast any changes if the previous value is equal to the new value.
+   */
+  publish: (input?: ISetInput<S>) => void
+
+  /**
+   * Sets the value passed through `input` to the draft.
+   *
+   * This function won't broadcast a draft change if the previous value is equal to the new value.
+   *
+   * @param input It can be a raw value or a function whose first and sole argument is the value of the previous `draft`. In case there is no previous draft, the first argument will be the previous value of `now`.
+   * @param broadcast (default: `true`) Whether to broadcast the change.
+   */
+  set: (input: ISetInput<S>, broadcast?: boolean) => ISuperStateDraftMethods<S>
 }
 
 export type IDraft<S> = S | undefined
-
-export enum EEventType {
-  BeforeSet = 'BeforeSet',
-  AfterSet = 'AfterSet',
-}
-
-function isMutator<S>(value: ISetInput<S>): value is (prev: S) => S {
-  return typeof value === 'function'
-}
 
 type ISetInput<S> = ((prev: S) => S) | S
 type ISubscriber<S> = (newState: S) => void
@@ -257,5 +262,10 @@ type IExtensionUserParams = any[]
 type IExtensionAllParams<S> = [IExtensionProps<S>, ...IExtensionUserParams]
 type IExtension<S> = (...params: IExtensionAllParams<S>) => IExtensionOutput<S>
 type IExtensions<S> = Record<string, IExtension<S>>
+type IExtensionMethods<S, E extends IExtensions<S>> = {
+  [key in keyof E]: (
+    ...params: DropFirst<Parameters<E[key]>>
+  ) => ISuperStateDraftMethods<S>
+}
 
 type IUnsubscribe = () => void

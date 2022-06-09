@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "core": "packages/core",
+    "react": "packages/react",
     "w3": "packages/w3"
   }
 }
