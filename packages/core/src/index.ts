@@ -38,9 +38,9 @@ export function superstate<S>(initialState: S): ISuperState<S> {
   }
 
   function set(input: ISetInput<S>, broadcast = true) {
-    const clone = cloneObj(_draft || _now)
+    const clone = _cloneObj(_draft || _now)
 
-    _draft = isMutator(input) ? input(clone) : input
+    _draft = _isMutator(input) ? input(clone) : input
 
     if (broadcast && !deepEqual(_draft, _now)) {
       _broadcastDraft()
@@ -131,8 +131,8 @@ export function superstate<S>(initialState: S): ISuperState<S> {
 
   function _getExtensionProps(): IExtensionProps<S> {
     return {
-      draft: cloneObj(_draft),
-      now: cloneObj(_now),
+      draft: _cloneObj(_draft),
+      now: _cloneObj(_now),
     }
   }
 
@@ -161,7 +161,7 @@ export function superstate<S>(initialState: S): ISuperState<S> {
   return _methods
 }
 
-function cloneObj<S>(inputState: S) {
+function _cloneObj<S>(inputState: S) {
   if (inputState === undefined) {
     return undefined
   }
@@ -177,7 +177,7 @@ function cloneObj<S>(inputState: S) {
   return JSON.parse(JSON.stringify(inputState))
 }
 
-function isMutator<S>(value: ISetInput<S>): value is (prev: S) => S {
+function _isMutator<S>(value: ISetInput<S>): value is (prev: S) => S {
   return typeof value === 'function'
 }
 

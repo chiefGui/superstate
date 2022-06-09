@@ -29,9 +29,7 @@ export function useSuperState<S>(
       unsubs.push(ss.subscribe(setDraft, 'draft'))
     }
 
-    return () => {
-      unsubs.forEach((u) => u())
-    }
+    return () => unsubs.forEach((u) => u())
   }, [])
 
   return null
