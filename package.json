@@ -5,10 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build:core": "nx build core --configuration=production",
-    "test:core": "nx test core",
-    "dev:w3": "nx dev w3",
-    "serve:w3": "nx serve w3",
-    "postinstall": "remix setup node"
+    "test:core": "nx test core"
   },
   "alias": {
     "@superstate/core": "@superstate/core/src/index.ts",
@@ -16,25 +13,8 @@
   },
   "private": true,
   "dependencies": {
-    "@docusaurus/core": "2.0.0-beta.13",
-    "@docusaurus/preset-classic": "2.0.0-beta.13",
-    "@fontsource/plus-jakarta-sans": "^4.5.8",
-    "@mdx-js/react": "^1.6.21",
-    "@remix-run/react": "^1.0.6",
-    "@remix-run/serve": "^1.0.6",
-    "clsx": "^1.1.1",
     "core-js": "^3.6.5",
-    "framer-motion": "^6.3.10",
-    "lodash": "^4.17.21",
-    "prism-react-renderer": "^1.2.1",
-    "react": "18.1.0",
-    "react-div-100vh": "^0.7.0",
-    "react-dom": "18.1.0",
-    "react-syntax-highlighter": "^15.5.0",
     "regenerator-runtime": "0.13.7",
-    "remix": "^1.0.6",
-    "slugify": "^1.6.5",
-    "tailwind-merge": "^1.2.1",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
@@ -46,12 +26,10 @@
     "@nrwl/js": "^14.2.4",
     "@nrwl/linter": "^14.2.4",
     "@nrwl/react": "^14.2.4",
-    "@nrwl/remix": "^14.1.7",
     "@nrwl/storybook": "^14.2.4",
     "@nrwl/web": "^14.2.4",
     "@nrwl/workspace": "^14.2.4",
     "@nx-plus/docusaurus": "^14.0.0",
-    "@remix-run/dev": "^1.0.6",
     "@testing-library/react": "13.1.1",
     "@types/jest": "27.4.1",
     "@types/lodash": "^4.14.182",
