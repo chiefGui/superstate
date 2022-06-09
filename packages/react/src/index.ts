@@ -38,5 +38,8 @@ export function useSuperState<S>(
 }
 
 interface IUseSuperStateOptions {
+  /**
+   * The target to monitor. If not specified, whenever either `now` or `draft` changes, the component will rerender.
+   */
   target: 'now' | 'draft'
 }
