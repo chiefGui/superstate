@@ -5,7 +5,6 @@ import * as deepEqual from 'fast-deep-equal'
  *
  * @param initialState The initial state.
  * @returns Methods (`ISuperState`) to work with your state.
- *
  */
 export function superstate<S>(initialState: S): ISuperState<S> {
   let _now = initialState

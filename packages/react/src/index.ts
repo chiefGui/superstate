@@ -10,7 +10,6 @@ import { IDraft, ISuperState } from '@superstate/core'
  * @param options.target - (default: `undefined`) The target to monitor. If not specified, whenever either `now` or `draft` changes, the component will rerender.
  *
  * @returns `null`
- *
  */
 export function useSuperState<S>(
   ss: Pick<ISuperState<S>, 'subscribe' | 'now' | 'draft'>,
