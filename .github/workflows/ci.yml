@@ -33,7 +33,7 @@ jobs:
     - name: Nx set SHAs
       uses: nrwl/nx-set-shas@v2.0.2
 
-    - run: npm ci
+    - run: npm install --frozen-lockfile
 
     - run: npx nx affected --target=lint --parallel=3
     - run: npx nx affected --target=test --parallel=3
