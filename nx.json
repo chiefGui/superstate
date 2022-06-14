@@ -30,6 +30,12 @@
         "style": "none",
         "linter": "eslint"
       }
+    },
+    "@nrwl/next": {
+      "application": {
+        "style": "css",
+        "linter": "eslint"
+      }
     }
   },
   "targetDependencies": {
@@ -45,5 +51,6 @@
         "projects": "self"
       }
     ]
-  }
+  },
+  "defaultProject": "w3"
 }

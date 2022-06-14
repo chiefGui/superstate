@@ -1,0 +1,116 @@
+---
+sidebar_position: 4
+---
+
+# Broadcasting
+
+If you want to do something when your state changes, broadcasting is the way to go.
+
+## Subscribing to changes
+
+To start listening to a **superstate**, you have to subscribe to it:
+
+```ts
+import { superstate } from '@superstate/core'
+
+const count = superstate(0)
+
+count.subscribe(newNow => {
+  console.log(newNow)
+})
+```
+
+And then, if you publish something:
+
+```ts
+count.publish(1)
+```
+
+The `console.log(newNow)` will be called.
+
+By default, your subscriptions will target changes made to `now`. If you want to listen for changes made to the [draft state](/getting-started/drafts):
+
+```ts {3}
+count.subscribe(newDraft => {
+  console.log(newDraft)
+}, 'draft') // pay attention to the 'draft' here
+```
+
+In case you'd like to listen to changes made to both states, `now` and `draft`:
+
+```ts {3}
+count.subscribe(newDraft => {
+  console.log(newDraft)
+}, 'all') // pay attention to the 'all' here
+```
+
+:::info Remember
+If your subscription is targeting a `draft`, only changes made via `.set()` will be caught. [Learn more &rarr;](/getting-started/drafts)
+:::
+
+## Unsubscribing
+
+If you are not interested in changes anymore, you can call the function returned from `subscribe`:
+
+```ts
+const unsubscribe = count.subscribe(newNow => {
+  console.log(newNow)
+})
+
+// do whatever you want
+
+unsubscribe() // from now on, the previous subscriber is no more a subscriber
+```
+
+If you're feeling bold and want to unsubscribe all subscribers, you can call `unsubscribeAll`:
+
+```ts
+count.unsubscribeAll()
+```
+
+:::caution
+When you call `unsubscribeAll()`, it's literally unsubscribe all&mdash;no subscriber is safe. Just use it if you know
+what you are doing.
+:::
+
+## Exceptions
+
+There are two exceptions for when changes won't be broadcasted.
+One is if the next state value is the same as the previous one&mdash;**superstate** understands that nothing has changed,
+hence there's no reason to broadcast.
+
+The other exception is when you explictly specify `{ silent: true }` to either your `.publish()` or `.set()` calls:
+
+```ts
+count.publish(1, { silent: true }) // this won't broadcast
+count.set(1, { silent: true }) // this won't broadcast
+```
+
+## React
+
+If you want your components to re-render when your state changes, it's better to use the `useSuperState()` hook:
+
+```tsx {7}
+import { superstate } from '@superstate/core'
+import { useSuperState } from '@superstate/react'
+
+const count = superstate(0)
+
+function MyComponent() {
+  useSuperState(count)
+
+  // Below it's just a sample effect
+  // that will publish a change after 1 second
+  // to demonstrate that this component will re-render
+  // once the change is published.
+  useEffect(() => {
+    setTimeout(() => {
+      count.publish(10)
+    }, 1000)
+  }, [])
+
+  return <div>{count.now}</div>
+}
+```
+
+[You can learn more here.](/getting-started/react)

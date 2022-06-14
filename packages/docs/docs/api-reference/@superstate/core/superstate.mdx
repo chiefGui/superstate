@@ -1,0 +1,218 @@
+---
+sidebar_position: 1
+---
+
+# superstate
+
+The superstate wrapper. This is the function that you should use to create a superstate.
+
+Examples:
+
+```typescript
+// Primitives
+const greet = superstate('Hello world!')
+const count = superstate(0)
+const isLoggedIn = superstate(false)
+
+// Objects
+const person = superstate({ id: '0', name: 'John' })
+
+// Nested objects
+const theme = superstate({
+  header: { color: 'red' },
+  footer: { color: 'blue' },
+  links: [
+    { href: '#', text: 'Home' },
+    { href: '#', text: 'About' },
+  ]
+})
+
+// Collections
+const people = superstate([
+  { id: '0', name: 'John' },
+  { id: '1', name: 'Doe' }
+])
+
+// Maps
+const numbers = superstate(new Map([
+  ['one', 1],
+  ['two', 2]
+]))
+
+// Sets
+const colors = superstate(new Set(['Red', 'Yellow']))
+```
+
+
+## now
+
+The most accurate version of your state. The one your clients must trust the most.
+
+```ts
+const count = superstate(0)
+
+console.log(count.now()) // 0
+
+count.publish(10)
+
+console.log(count.now()) // 10
+```
+
+## draft
+
+The draft version of your state. May be `undefined` if no draft is available. To set the value of the draft, call `.set()`.
+
+```ts
+const count = superstate(0)
+
+console.log(count.draft()) // undefined
+
+count.set(10)
+
+console.log(count.draft()) // 10
+```
+
+:::info
+If you don't plan to use [Drafts](/getting-started/drafts), always use [now](#now) instead.
+:::
+
+## publish
+
+Publishes the value passed in the input or the `draft`, if the input is `undefined`.
+It won't broadcast any changes if the previous `now` would be equal the new `now`.
+
+### Without `draft`
+
+You don't need to maintain a `draft` in order to `publish`. You can pass the value to publish directly to the function:
+
+```typescript
+const count = superstate(0)
+
+count.publish(1) // now === 1
+count.publish(prev => prev + 1) // now === 2
+```
+
+### With `draft`
+
+If you want to maintain a `draft`, you can `publish` without any arguments:
+
+```typescript
+const count = superstate(0)
+
+count.set(1) // draft === 1
+count.publish() // draft === undefined, now === 1
+```
+
+### Broadcast
+
+Every time you `.publish()`, changes will be broadcasted unless the previous `now` would be equal the new `now`
+or you pass the `true` to the `silent` option:
+
+```typescript
+const count = superstate(0)
+
+count.publish(1, { silent: true }) // won't be broadcasted
+```
+
+## set
+
+Sets the value passed through `input` to the draft.
+
+```ts
+const count = superstate(0)
+
+count.set(1) // if you want to override `draft`
+count.set(prev => prev + 1) // if you want to use the previous `draft`
+```
+
+:::info
+If you don't plan to use [Drafts](/getting-started/drafts), prefer to mutate your state with [publish](#publish) instead.
+:::
+
+### Broadcast
+
+Whenever you `.set()`, changes will be broadcasted unless the previous `draft` would be equal the new `draft`
+or you pass the `true` to the `silent` option:
+
+```ts
+const count = superstate(0)
+
+count.set(1, { silent: true })
+```
+
+## discard
+
+Discards the draft, setting its value to `undefined`.
+
+Upon calling this function, a draft broadcast will occur.
+
+```ts
+const count = superstate(0)
+
+count.set(1) // draft === 1
+
+count.discard() // draft === undefined
+```
+
+## subscribe
+
+Starts monitoring changes to the state.
+
+```ts
+const count = superstate(0)
+
+count.subscribe(value => console.log(value))
+
+count.publish(10) // this will trigger the subscribe callback
+```
+
+You can also subscribe to changes made to the `draft`:
+
+```ts
+const count = superstate(0)
+
+count.subscribe(value => console.log(value), 'draft')
+
+count.set(10) // this will trigger the subscribe callback
+```
+
+### unsubscribe
+
+The `.subscribe()` method returns a unsubscribe function:
+
+```ts
+const count = superstate(0)
+
+const unsubscribe = count.subscribe(value => console.log(value))
+
+count.publish(10) // this will trigger the subscribe callback
+
+unsubscribe() // stop listening to changes
+
+count.publish(10) // this wont trigger the subscribe callback
+```
+
+## unsubscribeAll
+
+Unsubscribes all `now` and `draft` subscribers.
+After you call this method, changes will no longer be broadcasted.
+
+```ts
+const count = superstate(0)
+
+count.subscribe(value => console.log(value))
+
+count.publish(10) // this will trigger the subscribe callback
+
+count.unsubscribeAll() // stop listening to changes
+
+count.publish(10) // this wont trigger the subscribe callback
+```
+
+## extend
+
+Read more about [Extensions](/getting-started/extensions).
+
+## use
+
+Read more about [Middlewares](/advanced/middlewares).

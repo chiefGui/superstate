@@ -3,11 +3,10 @@ import { useEffect, useState } from 'react'
 import { IDraft, ISuperState } from '@superstate/core'
 
 /**
- * A React hook that rerenders the component when
- * a superstate changes.
+ * A React hook that re-renders the component when a superstate changes.
  *
  * @param ss - The `superstate` instance.
- * @param options.target - (default: `undefined`) The target to monitor. If not specified, whenever either `now` or `draft` changes, the component will rerender.
+ * @param options.target - (default: `undefined`) The target to monitor. If not specified, whenever either `now` or `draft` changes, the component will re-render.
  *
  * @returns `null`
  */
@@ -37,7 +36,7 @@ export function useSuperState<S>(
 
 interface IUseSuperStateOptions {
   /**
-   * The target to monitor. If not specified, whenever either `now` or `draft` changes, the component will rerender.
+   * The target to monitor. If not specified, whenever either `now` or `draft` changes, the component will re-render.
    */
   target: 'now' | 'draft'
 }

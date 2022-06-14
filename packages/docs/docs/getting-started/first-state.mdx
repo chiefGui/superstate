@@ -1,0 +1,50 @@
+---
+sidebar_position: 2
+---
+
+# Your first superstate
+
+It's time to have fun. Let's create a superstate that stores a number:
+
+```typescript
+import { superstate } from '@superstate/core'
+
+const count = superstate(0)
+```
+
+To display what `count` looks like:
+
+```typescript
+console.log(count.now()) // logs 0
+```
+
+And to change what `count` should be:
+
+```typescript
+count.publish(5)
+
+console.log(count.now()) // logs 5
+```
+
+**superstate** allows more complex objects as well:
+
+```ts
+const user = superstate({
+  name: 'John Doe',
+  role: 'admin',
+  posts: [
+    { id: '1', title: 'Hello world' },
+    { id: '2', title: 'World hello' }
+  ]
+})
+```
+
+And if you want to edit the role of the `user`:
+
+```ts
+console.log(user.now().role) // logs 'admin'
+
+user.publish(prev => ({ ...prev, role: 'editor' }))
+
+console.log(user.now().role) // logs 'editor'
+```

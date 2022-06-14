@@ -1,20 +1,60 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/w3",
   "projectType": "application",
-  "sourceRoot": "packages/w3/src",
   "targets": {
     "build": {
-      "executor": "@nx-plus/docusaurus:browser",
+      "executor": "@nrwl/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
+        "root": "packages/w3",
         "outputPath": "dist/packages/w3"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
       }
     },
     "serve": {
-      "executor": "@nx-plus/docusaurus:dev-server",
+      "executor": "@nrwl/next:server",
+      "defaultConfiguration": "development",
       "options": {
-        "port": 3300
+        "buildTarget": "w3:build",
+        "dev": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "w3:build:development",
+          "dev": true
+        },
+        "production": {
+          "buildTarget": "w3:build:production",
+          "dev": false
+        }
+      }
+    },
+    "export": {
+      "executor": "@nrwl/next:export",
+      "options": {
+        "buildTarget": "w3:build:production"
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/w3"],
+      "options": {
+        "jestConfig": "packages/w3/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/w3/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },
-  "tags": []
+  "tags": ["scope:client"]
 }

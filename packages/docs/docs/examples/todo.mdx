@@ -1,0 +1,69 @@
+---
+sidebar_position: 1
+---
+
+import { Code } from '../../src/components/code'
+
+# Todo App
+
+<Code files={{ '/App.tsx': `\
+import { superstate } from '@superstate/core'
+import { useSuperState } from '@superstate/react'\n
+\
+const todos = superstate<ITodo[]>([])\n
+\
+export default function App() {
+  useSuperState(todos)\n
+\
+  function handleSubmit(e) {
+    e.preventDefault()\n
+\
+    if (e.target.elements.text.value === '') {
+      return
+    }\n
+\
+    todos.publish(prev => ([
+      ...prev,
+      { id: String(prev.length + 1), text: e.target.elements.text.value }
+    ]))\n
+\
+    e.target.reset()
+  }\n
+\
+  function handleRemoveTodoById(id: string) {
+    todos.publish(prev => prev.filter(todo => todo.id !== id))
+  }\n
+\
+  function handleToggleTodoById(id: string) {
+    todos.publish(prev => prev.map(todo => (
+      todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
+    )))
+  }\n
+\
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input placeholder='What you have to do?' name='text' />
+        <button>Submit</button>
+      </form>\n
+\
+      {todos.now().map(t => {
+        return (
+          <div key={t.id}>
+            <button style={{ marginRight: 10 }} onClick={() => handleRemoveTodoById(t.id)}>X</button>
+            <span style={{ color: t.isCompleted ? 'gray' : 'black', textDecoration: t.isCompleted ? 'line-through' : 'initial' }}>{t.text}</span>
+            <button style={{ marginLeft: 10 }} onClick={() => handleToggleTodoById(t.id)}>
+              {t.isCompleted ? 'Undo' : 'Done'}
+            </button>
+          </div>
+        )
+      })}
+    </div>
+  )
+}\n
+\
+interface ITodo {
+  id: string
+  text: string
+  isCompleted?: boolean
+}` }} />

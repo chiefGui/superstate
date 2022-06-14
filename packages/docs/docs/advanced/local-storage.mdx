@@ -1,0 +1,66 @@
+---
+sidebar_position: 2
+---
+
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
+
+# Automatic localStorage persistency
+
+Install the `@superstate/adapters` package:
+
+<Tabs>
+<TabItem value="bash" label="npm">
+
+```bash
+npm install @superstate/adapters
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn add @superstate/adapters
+```
+
+</TabItem>
+</Tabs>
+
+
+And plug the `ls` adapter into your **superstate**:
+
+```typescript
+import { superstate } from '@superstate/core'
+import { ls } from '@superstate/adapters'
+
+const count = superstate(0).use([
+  ls('count') // 'count' is the localStorage key
+])
+```
+
+Now, whenever `now` changes, its value will be persisted against the `localStorage`:
+
+```typescript
+count.publish(5)
+
+console.log(localStorage.getItem('count')) // logs 5
+```
+
+## Initial value
+
+When `ls` is plugged into your state, its initial value will be whatever is stored in the `localStorage` under the key you specified. For example:
+
+```typescript
+localStorage.setItem('count', 5)
+
+const count = superstate(0).use([
+  ls('count') // 'count' is the key
+])
+
+console.log(count.now()) // logs 5
+```
+
+## Limitations
+
+- Currently, only `JSON.stringify()`-able objects can be persisted.
+- The `ls` adapter will not persist `draft` state.

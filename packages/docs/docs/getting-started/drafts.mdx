@@ -1,0 +1,153 @@
+---
+sidebar_position: 3
+---
+
+# Drafts
+One of the key and most opionionated feature of **superstate** is the built-in draft management.
+Drafts are preliminatory versions of your state that you are free to mutate without impacting
+the final user.
+
+To illustrate the concept of drafts to you: when you're typing a text message to someone, the said text is just
+a draft as long as you don't submit it. While the text is just a draft, you're free to change it as much as you like.
+
+## Creating a draft
+There are two ways of changing the "value" of a `superstate`:
+
+```typescript
+const count = superstate(0)
+
+count.set(5)
+```
+
+In the example above, by calling `.set(5)`, only the `.draft()` version of `count` will be changed.
+
+```typescript
+const count = superstate(0)
+
+count.publish(5)
+```
+
+In the other hand though, `.publish(5)` will eliminate whatever you have in the `.draft()` of `count` and assign `5` to `.now()`,
+which corresponds to the value you want your users to see.
+
+### Updating an existing draft
+```typescript
+const count = superstate(0)
+
+count.set(5) // `.draft()` will be 5
+count.set(10) // `.draft()` will be 10
+count.set(prev => prev + 1) // `.draft()` will be 11
+```
+
+:::warning
+Always prefer to [`.discard()`](#discarding-a-draft) a draft when you no longer want it instead of `.set(undefined)` because
+`.discard()` does more than just set the draft's value to `undefined`.
+
+However, for whatever reason, if you literally just want the `.draft()` to become `undefined`, feel free to `.set(undefined)`.
+:::
+
+## Reading a draft
+
+To display the draft version of a superstate, you simply call `.draft()`:
+
+```typescript
+const count = superstate(0)
+
+count.set(20)
+
+console.log(count.draft()) // logs 20
+```
+
+
+## Publishing a draft
+
+When you change the value of a draft (by calling `.set(5)`, for example), this change is intentionally not propagated to `.now()` and only exists in `.draft()`.
+In order to publish it, guess what, you gotta call `.publish()`:
+
+```typescript
+const count = superstate(0)
+
+count.set(20)
+count.publish()
+```
+
+After you call `.publish()`, **superstate** will do two things:
+
+1. Assign `.draft()` to `.now()`,
+2. dispose the value of `.draft()`, making it become `undefined`.
+
+### Discarding a draft
+Let's say you made changes to your draft but in the end you changed your mind. Super fine&mdash;discarding drafts is simple:
+
+```typescript
+const count = superstate(0)
+
+count.set(10)
+count.discard() // Nah, 10 is not enough!
+
+count.set(20)
+count.publish() // Yeah, 20 it is!
+```
+
+## Monitoring draft changes
+If you like to do something whenever a draft changes, you can subscribe to your state's draft by passing `'draft'` as the second argument
+of the `.subscribe()` function:
+
+```typescript
+const count = superstate(0)
+
+count.subscribe(value => {
+  console.log(value)
+}, 'draft')
+```
+
+:::info
+By default, `.subscribe()` will only listen to `.now()` changes.
+:::
+
+If you no longer want to listen to draft changes:
+
+```typescript
+const count = superstate(0)
+const unsubscribe = count.subscribe(console.log, 'draft')
+
+unsubscribe()
+
+// Now, you can safely mutate the draft that
+// no changes will be broadcasted.
+```
+
+### What changes are broadcasted?
+
+Changes are only broadcasted if the new value of the draft is different from the previous value. With that in mind:
+
+- Whenever `.set(value)` is called,
+- and/or whenever `.publish()` is called,
+- and/or whenever `.discard()` is called.
+
+:::info
+No matter how complex the value of `draft()` is, **superstate** will deep compare the previous value with the next value,
+to make sure changes are only broadcasted when needed.
+:::
+
+## `undefined` drafts
+
+If your state doesn't have a draft version, `undefined` will be returned when trying to read it through `.draft()`:
+
+```typescript
+const count = superstate(0)
+
+console.log(count.draft()) // logs `undefined`
+```
+
+You might be wondering why and/or when a draft is `undefined`. Well, the idea is that `superstate` aims to be as respectful
+as possible with your user's memory usage. In short, **superstate** only issues
+drafts when needed and disposes them when no longer needed.
+
+### Draft disposal
+
+`.draft()` will return `undefined` when:
+
+- You haven't `.set()` anything,
+- after you call `.discard()` or
+- after you call `.publish()`.

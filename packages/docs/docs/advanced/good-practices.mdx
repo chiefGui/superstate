@@ -1,0 +1,61 @@
+---
+sidebar_position: 5
+---
+
+# Good Practices
+
+## Mutating the state based on its previous value
+
+❌ **Don't:**
+```typescript
+const count = superstate(0)
+
+count.publish(count + 1)
+```
+
+✅ **Do:**
+```typescript
+const count = superstate(0)
+
+count.publish(prev => prev + 1)
+```
+
+## Abstract complex logic with Extensions
+
+It's tempting to just rush and use the built-in methods to handle your state. They work. However, it may become unsustainable at some point if
+you don't abstract complex, not obvious logic into small, organized pieces. [Extensions](/getting-started/extensions) are here for you.
+
+❌ **Don't:**
+```typescript
+const user = superstate({ firstName: 'John', lastName: 'Doe', slug: 'john-doe' })
+
+user.publish(prev => ({
+  ...prev,
+  firstName: 'Hello',
+  lastName: 'World',
+  slug: slugify('Hello World')
+}))
+```
+
+✅ **Do:**
+```typescript
+function rename({ publish }, { firstName, lastName }) {
+  publish(prev => {
+    ...prev,
+
+    firstName,
+    lastName,
+    slug: slugify(`${firstName} ${lastName}`)
+  })
+}
+
+const user =
+  superstate({ firstName: 'John', lastName: 'Doe', slug: 'john-doe' })
+    .extend({ rename })
+
+user.rename({ firstName: 'Hello', lastName: 'World' })
+```
+
+:::info Types!
+Extensions are seamlessly integrated with TypeScript. They show up in your editor's autocomplete as well as their arguments. Take advantage of it!
+:::

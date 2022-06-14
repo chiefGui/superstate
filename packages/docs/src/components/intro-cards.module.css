@@ -1,0 +1,27 @@
+.container {
+  @apply grid grid-cols-2 gap-4;
+}
+
+.card {
+  @apply flex flex-col gap-6 p-6 bg-gray-800 cursor-pointer rounded-xl;
+}
+
+.intro {
+  @apply flex flex-col gap-2;
+}
+
+.title {
+  @apply m-0;
+}
+
+.description {
+  @apply m-0 text-sm text-gray-200;
+}
+
+.card:hover .cta {
+  @apply text-yellow-600;
+}
+
+.cta {
+  @apply m-0 text-sm font-bold transition-all;
+}

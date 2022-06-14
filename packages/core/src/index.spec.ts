@@ -1,4 +1,4 @@
-import { superstate } from '.'
+import { IMiddlewareInput, superstate } from '.'
 
 describe('superstate', () => {
   describe('now', () => {
@@ -35,19 +35,27 @@ describe('superstate', () => {
       expect(count.draft()).toBe(20)
     })
 
+    test('assigns 0 to the value of the draft', () => {
+      const count = superstate(10)
+
+      count.set(0)
+
+      expect(count.draft()).toBe(0)
+    })
+
     test('assigns the value to the draft without broadcasting changes', () => {
       const count = superstate(0)
 
       const subscriber = jest.fn()
       count.subscribe(subscriber, 'draft')
 
-      count.set(5, true)
+      count.set(5, { silent: false })
       expect(subscriber).toHaveBeenCalledTimes(1)
 
-      count.set(5, true)
+      count.set(10, { silent: false })
       expect(subscriber).toHaveBeenCalledTimes(2)
 
-      count.set(5, false)
+      count.set(5, { silent: true })
       expect(subscriber).toHaveBeenCalledTimes(2)
     })
 
@@ -111,29 +119,6 @@ describe('superstate', () => {
     })
   })
 
-  describe('extensions', () => {
-    test('changes the draft based on now', () => {
-      const count = superstate(5).extend({
-        sum: ({ now }, num: number) => now + num,
-      })
-
-      count.sum(10)
-
-      expect(count.draft()).toBe(15)
-    })
-
-    test('changes the draft based on prev draft', () => {
-      const count = superstate(5).extend({
-        sum: ({ now, draft }, num: number) => (draft ?? now) + num,
-      })
-
-      count.set(10)
-      count.sum(5)
-
-      expect(count.draft()).toBe(15)
-    })
-  })
-
   describe('subscribe', () => {
     test('reacts to `now` changes via set/publish', () => {
       const count = superstate(0)
@@ -160,6 +145,20 @@ describe('superstate', () => {
       expect(sub).toHaveBeenCalledTimes(1)
     })
 
+    test('reacts to `now` when published is 0', () => {
+      const count = superstate(0)
+
+      const sub = jest.fn()
+      count.subscribe(sub)
+
+      count.publish(1)
+      count.publish(2)
+      count.publish(3)
+      count.publish(0)
+
+      expect(sub).toHaveBeenCalledTimes(4)
+    })
+
     test('reacts to `draft` changes', () => {
       const count = superstate(0)
 
@@ -170,6 +169,20 @@ describe('superstate', () => {
       count.set(5)
 
       expect(sub).toHaveBeenCalledTimes(1)
+    })
+
+    test('reacts to `draft` when set is 0', () => {
+      const count = superstate(0)
+
+      const sub = jest.fn()
+      count.subscribe(sub, 'draft')
+
+      count.set(1)
+      count.set(2)
+      count.set(3)
+      count.set(0)
+
+      expect(sub).toHaveBeenCalledTimes(4)
     })
 
     test('stop reacting when unsubscribe', () => {
@@ -184,6 +197,257 @@ describe('superstate', () => {
       unsub()
       count.set(5)
       expect(sub).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('extensions', () => {
+    test('publishes a new value', () => {
+      const count = superstate(5).extend({
+        sum: ({ publish }, num: number) => publish((prev) => prev + num),
+      })
+
+      count.sum(10)
+
+      expect(count.now()).toBe(15)
+    })
+
+    test('changes the draft based on prev draft', () => {
+      const count = superstate(5).extend({
+        sum: ({ set }, num: number) => set((prev) => prev + num),
+      })
+
+      count.set(10)
+      count.sum(5)
+
+      expect(count.draft()).toBe(15)
+    })
+  })
+
+  describe('middlewares', () => {
+    test('calls a middleware before publish', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'before:publish') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.publish(10)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware after publish', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'after:publish') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.publish(10)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware before set', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'before:set') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.set(10)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware after set', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'after:set') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.set(10)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware before discard', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'before:discard') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.set(10)
+      count.discard()
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware after discard', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'after:discard') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.set(10)
+      count.discard()
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware before broadcast now', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'before:broadcast:now') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.publish(30)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware after broadcast now', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'after:broadcast:now') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.publish(25)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware before broadcast draft', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'before:broadcast:draft') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.set(30)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware after broadcast draft', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'after:broadcast:draft') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.set(25)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('dont call middleware if silent before broadcast now', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'before:broadcast:now') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.publish(30, { silent: true })
+
+      expect(mockFn).toHaveBeenCalledTimes(0)
+    })
+
+    test('dont call middleware if silent after broadcast now', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'after:broadcast:now') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.publish(25, { silent: true })
+
+      expect(mockFn).toHaveBeenCalledTimes(0)
+    })
+
+    test('dont call middleware if silent before broadcast draft', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'before:broadcast:draft') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.set(30, { silent: true })
+
+      expect(mockFn).toHaveBeenCalledTimes(0)
+    })
+
+    test('dont call middleware if silent after broadcast draft', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'after:broadcast:draft') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.set(25, { silent: true })
+
+      expect(mockFn).toHaveBeenCalledTimes(0)
     })
   })
 })
