@@ -9,6 +9,7 @@ on:
     paths:
       - packages/core/**
       - packages/react/**
+      - packages/adapters/**
 
     branches:
       - main
