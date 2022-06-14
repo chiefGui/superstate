@@ -1,5 +1,13 @@
 # @superstate/core
 
+## 0.0.2
+
+### Patch Changes
+
+- 5012709: Approach RC
+- Updated dependencies [5012709]
+  - @superstate/core@0.0.11
+
 ## 0.0.9
 
 ### Patch Changes
