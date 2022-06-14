@@ -5,7 +5,6 @@
     "adapters": "packages/adapters",
     "core": "packages/core",
     "docs": "packages/docs",
-    "react": "packages/react",
-    "w3": "packages/w3"
+    "react": "packages/react"
   }
 }
