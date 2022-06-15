@@ -1,5 +1,12 @@
 # @superstate/react
 
+## 0.0.18
+
+### Patch Changes
+
+- Updated dependencies [8c8ef89]
+  - @superstate/core@0.0.12
+
 ## 0.0.17
 
 ### Patch Changes
