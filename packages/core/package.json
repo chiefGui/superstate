@@ -1,6 +1,6 @@
 {
   "name": "@superstate/core",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "The essential package for superstate, the state management library.",
   "main": "src/index.ts",
   "publishConfig": {

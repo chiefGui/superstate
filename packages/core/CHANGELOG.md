@@ -1,5 +1,11 @@
 # @superstate/core
 
+## 0.0.12
+
+### Patch Changes
+
+- 8c8ef89: Several API changes
+
 ## 0.0.11
 
 ### Patch Changes
