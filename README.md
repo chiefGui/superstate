@@ -1,53 +1,96 @@
-# superstate <!-- omit in toc -->
+<div align="center">
 
-A minimal, sleek, 1 dependency only library to manage shared state. Works in the browser and Node applications. Written in TypeScript, with a hook for React.
+   _Is it a bird? Is it a plane? No, it is **superstate**!_
+</div>
 
-## Table of Contents <!-- omit in toc -->
-- [Quick Start](#quick-start)
-- [Usage with React](#usage-with-react)
-- [Drafts](#drafts)
-- [Doing stuff when the state change](#doing-stuff-when-the-state-change)
-  - [When are the changes broadcasted?](#when-are-the-changes-broadcasted)
-- [Middlewares](#middlewares)
-  - [Writing middlewares](#writing-middlewares)
-- [Why?](#why)
+![superstate hero](https://i.imgur.com/EhecV7G.png)
 
-## Quick Start
+<div align="center">
+   
+### Behold your next favorite state management library for the XXI century.
+  
+[Quick Start](https://superstate.dev/getting-started/first-state) · [Examples](https://superstate.dev/examples) · [Documentation](https://superstate.dev) · [API Reference](https://superstate.dev/api-reference/@superstate/core/superstate)
+</div>
 
-1. Install the package, either through `npm` or `yarn`:
-```shell
-npm install @superstate/core 
-```
+---
 
 ```shell
-yarn add @superstate/core 
+yarn add @superstate/core
 ```
 
-2. Import and wrap any value within `superstate`:
+---
+
+#### ✨ **Simple, sleek, intuitive & elegant API**
+
 ```ts
 import { superstate } from '@superstate/core'
 
 const count = superstate(0)
-```
 
-3. Update your state:
-
-```ts
 count.set(5)
-count.publish()
-```
 
-4. See the new value:
-
-```ts
 console.log(count.now()) // 5
 ```
 
-## Usage with React
+_Yep, that simple. No PhD required._
 
-```shell
-yarn add @superstate/react
+#### 🤯 Sharing/reusing state across files, components, etc is mindless
+
+```ts
+// count.ts
+import { superstate } from '@superstate/core'
+
+export const count = superstate(0)
+
+// calculator.ts
+import { count } from './count.ts'
+
+count.set(5)
+
+// app.ts
+import { count } from './count.ts'
+
+// When calculator.ts changes count, it'll call the callback below! :D
+count.subscribe(value => {
+  console.log(value)
+})
 ```
+
+_The trick is the `export` keyword: to share your state, all you have to do is exporting and importing it._
+
+#### 📐 Designed with ergonomy and developer wellness in mind
+
+**superstate** puts the developer first&mdash;from the beginner to the veteran. No changes are made without thorough consideration and confidence that working with superstate is pure pleasure.
+
+#### 🧩 Fully extensible
+
+Instead of building **superstate** with lots of useless opinionated features, the idea is to give you the tools to expand it as much as you need&mdash;and only *when* you need. Middlewares and Extensions are at your service.
+
+#### 📝 Built-in Drafts System
+
+Great UX doesn't have to be a burden to build. With the built-in Drafts System, you can give your users second chances without spending an extra day on it.
+
+```ts
+const count = superstate(0)
+
+count.sketch(5)
+console.log(count.draft()) // 5
+console.log(count.now()) // 0
+
+count.publish()
+console.log(count.draft()) // undefined
+console.log(count.now()) // 5
+```
+
+#### 🤘 Follows you from the prototype to the world's next big thing
+
+Regardless of the scale of your project, **superstate** *will* fit. It is small and simple. If your application hits big, **superstate** will follow along. If you already have an ongoing application, **superstate** can be incrementally adopted, so don't worry of implementing it after the first rail was already built.
+
+#### ⌨️ Proudly written in TypeScript
+
+Building **superstate** without TypeScript was never an option.
+
+#### ⚛️ Deadly simple integration with React apps
 
 ```tsx
 import { superstate } from '@superstate/core'
@@ -55,136 +98,40 @@ import { useSuperState } from '@superstate/react'
 
 const count = superstate(0)
 
-function MyComponent() {
+export const MyComponent = () => {
   useSuperState(count)
 
-  return <div>{count.now()}</div>
+  return (
+    <div>
+      <div>Count: ${count}</div>
+      <button onClick={() => count.set(prev => prev + 1))>Increase</button>
+    </div>
+  )
 }
 ```
 
-## Drafts
-When writing an email or a message to someone, the apps usually asks us to hit `Submit` (thankfully) and only then whatever we wrote is computed and delivered to the destination. If we think about it, prior to submitting the message,  we're in a "draft" state, which is an opportunity to improve and/or correct any issues with whatever we typed. One cool thing about `superstate` is the built-in drafts feature, which is exactly that: an opportunity for us to go wild with our state without letting the world know about it.
+You read it right: calling the `useSuperState(count)` hook is all you need to make your component re-render when `count` increases.
 
-In practice, the above means it's easy for you to build a text editor with undo capabilities without having to think too much. Another interesting use-case would be a form where we want to allow the user to review the changes they made prior to officially submitting the form. Now, the two examples are easy to achieve with `superstate`. I mean, not only easy, but out-of-the-box. Let's see an example.
+#### 🌐 Works in the browser or in Node environments
 
-```ts
-const text = superstate('I wrote a text!')
+Browser-only apps, hybrid apps (such as [Electron](https://www.electronjs.org/)), Node apps... check, check, check!
 
-text.set('Oh, this text is better!')
+#### ✅ SSR-ready
 
-console.log(text.now()) // displays `I wrote a text!`
-console.log(text.draft()) // displays `Oh, this text is better!`
-```
+Don't stress about `import { superstate } from '@superstate/core'` in your SSR applications&mdash;**superstate** just works and don't require you to put ifs to check whether you're in the browser or in a node environment.
 
-Cool, huh? And now, let's say you're happy with the changes and want to make it official:
+---
 
-```ts
-text.publish() // just call `.publish()`
+#### Brought to you by 🇧🇷 [Guilherme "chiefGui" Oderdenge](https://github.com/chiefGui).
 
-console.log(text.now()) // displays `Oh, this text is better!`
-```
+---
 
-Yeah, nice. But what happens to `.draft()`? Well... it will return `undefined`. That's because once you `publish` your changes, to save you some memory, `superstate` discards the draft. It may sound stupid discarding the draft in an example as simple as the one above, but don't forget the user may be writing a text of thousands of characters, right?
+The MIT License (MIT)
 
-## Doing stuff when the state change
+Copyright (c) 2022 Guilherme Oderdenge
 
-We can use methods like the built-in ones `subscribe` and `subscribeDraft`:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-```ts
-const count = superstate(0)
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-count.subscribe(newCount => console.log(`the new count is ${newCount}!`))
-count.subscribeDraft(newCountDraft => console.log(`the new count draft is ${newCountDraft}!`))
-
-count.set(10) // this will call `subscribeDraft`
-count.publish() // this will call `subscribe`
-```
-
-Want to stop listening? Easy: both `subscribe` and `subscribeDraft` return an `unsubscribe` function that allow you to stop listening for changes at any time:
-
-```ts
-const unsub = count.subscribe(console.log)
-const unsubDraft = count.subscribeDraft(console.log)
-
-unsub()
-unsubDraft()
-```
-
-### When are the changes broadcasted?
-
-- Whenever `now` changes, subscribers (through `subscribe`) will be called,
-- Whenever `draft` changes, draft subscribers (through `subscribeDraft`) will be called.
-
-However, `superstate` won't dispatch notifications if there's nothing relevant to know about. That said:
-
-```
-const count = superstate(0)
-
-count.set(0) // this won't dispatch a notification
-count.publish() // this won't dispatch a notification
-
-count.set(2) // this will (for `draft` subscribers only)
-count.publish() // this will (for `now` subscribers only)
-
-count.set(2) // this won't
-count.publish() // this won't
-```
-
-## Middlewares
-
-This is superstate without any middlewares:
-
-```ts
-const count = superstate(0)
-```
-
-And this is superstate with a middleware called `sum`:
-
-```ts
-const count = superstate(0, { sum: (prev, num: number) => prev + num })
-```
-
-You might ask why "middlewares". Well, it's quite simple. Instead of repeating yourself:
-
-```ts
-const count = superstate(0)
-
-count.set(prev => prev + 5)
-```
-
-You can do:
-
-```ts
-const count = superstate(0, { sum: (prev, num: number) => prev + num })
-
-count.sum(5)
-```
-
-### Writing middlewares
-
-When writing a middleware, keep in mind that its first argument is (and always should be) `prev`, which represents your current state. This is a cool thing because you don't have to worry about inconsistent data or unexpected values:
-
-```ts
-function sum(prev, num: number) {
-  return prev + num
-}
-
-function multiplyAndSum(prev, operation: [number, number]) {
-  return prev + operation[0] * operation[1]
-}
-
-const count = superstate(0, { sum, multiplyAndSum })
-
-count.sum(5)
-count.multiplyAndSum([2, 5])
-count.publish()
-
-console.log(count.now()) // 15
-```
-
-## Why?
-
-The state of any application is practically the core of it. And I've already used several solutions, for both small and large scale apps: XState, Jotai and Valtio (excellent!), Recoil, React Context, Redux, etc. But I always felt there was something missing. Some were (way) too minimal, some were (way) too complex. So I decided to give my opinion about it, and then `superstate` was born.
-
-Designed for optimal Developer Experience and ergonomics, `superstate` aims to fill the gaps I always had.
-
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

@@ -51,7 +51,7 @@ const config = {
         title: 'superstate',
         logo: {
           alt: 'My Site Logo',
-          src: 'img/logo.svg',
+          src: 'img/logo_without_copy.svg',
         },
         items: [],
       },

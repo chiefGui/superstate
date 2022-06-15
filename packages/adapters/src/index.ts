@@ -41,6 +41,10 @@ export function ls<S = any>(key: string, options?: ILSOptions) {
     if (options?.draft && eventType === 'after:sketch') {
       localStorage.setItem(`${key}${LS_DRAFT_SUFFIX}`, JSON.stringify(draft()))
     }
+
+    if (options?.draft && eventType === 'after:discard') {
+      localStorage.removeItem(`${key}${LS_DRAFT_SUFFIX}`)
+    }
   }
 }
 

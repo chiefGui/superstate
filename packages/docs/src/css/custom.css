@@ -112,6 +112,14 @@ aside > div > a:first-child {
   background: var(--ifm-menu-link-sublist-icon) 50%/1.2rem 1.2rem;
 }
 
+.menu__caret {
+  @apply !px-6 hover:bg-transparent;
+}
+
+.menu__caret:before {
+  background: var(--ifm-menu-link-sublist-icon) 50%/1.2rem 1.2rem;
+}
+
 .pagination-nav__link {
   @apply border-gray-800;
 }
