@@ -22,7 +22,7 @@ export default function App() {
       return
     }\n
 \
-    todos.publish(prev => ([
+    todos.set(prev => ([
       ...prev,
       { id: String(prev.length + 1), text: e.target.elements.text.value }
     ]))\n
@@ -31,11 +31,11 @@ export default function App() {
   }\n
 \
   function handleRemoveTodoById(id: string) {
-    todos.publish(prev => prev.filter(todo => todo.id !== id))
+    todos.set(prev => prev.filter(todo => todo.id !== id))
   }\n
 \
   function handleToggleTodoById(id: string) {
-    todos.publish(prev => prev.map(todo => (
+    todos.set(prev => prev.map(todo => (
       todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
     )))
   }\n

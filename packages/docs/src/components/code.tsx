@@ -28,8 +28,8 @@ export function Code({ files, preview = true, deps, options }: ICodeProps) {
         theme='dark'
         customSetup={{
           dependencies: {
-            '@superstate/core': '0.0.10',
-            '@superstate/react': '0.0.8',
+            '@superstate/core': '0.0.12',
+            '@superstate/react': '0.0.18',
             ...deps,
           },
         }}

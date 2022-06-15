@@ -95,7 +95,7 @@ count.set(prev => prev + 1) // now === 1
 count.set(prev => prev + 1) // now === 2
 ```
 
-### Broadcast
+### Broadcasting
 
 Whenever you `.set()`, changes will be broadcasted unless the new `now` is equal to the previous one,
 or you pass `true` to the `silent` option:
@@ -129,7 +129,7 @@ count.sketch(prev => prev + 1) // `draft` === 2
 If you don't plan to use [Drafts](/getting-started/drafts), prefer to mutate your state with [set](#set) instead.
 :::
 
-### Broadcast
+### Broadcasting
 
 Whenever you `.sketch()`, changes will be broadcasted unless the new `draft` is equal to the previous one,
 or you pass `true` to the `silent` option:
@@ -161,6 +161,18 @@ console.log(count.now()) // logs 1
 Don't worry about publishing if you're not using [Drafts](/getting-started/drafts).
 :::
 
+### Broadcasting
+
+Whenever you `.publish()`, changes will be broadcasted unless the new `now` is equal to the previous one,
+or you pass `true` to the `silent` option:
+
+```ts {4}
+const count = superstate(0)
+
+count.sketch(1)
+count.publish({ silent: true }) // won't be broadcasted
+```
+
 ## discard
 
 Discards the draft, setting its value to `undefined`.
@@ -176,6 +188,18 @@ count.discard() // draft === undefined
 ```
 
 If there's no draft to discard, nothing is going to happen.
+
+### Broadcasting
+
+Whenever you `.discard()`, changes will be broadcasted unless the new `draft` is equal to the previous one,
+or you pass `true` to the `silent` option:
+
+```ts {4}
+const count = superstate(0)
+
+count.sketch(1)
+count.discard({ silent: true }) // won't be broadcasted
+```
 
 ## subscribe
 

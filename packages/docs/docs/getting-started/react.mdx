@@ -37,8 +37,8 @@ Then you'll be able to import the `useSuperState` hook:
 \  return (
     <div>
       Count is <strong>{count.now()}</strong><br/>\n
-      <button onClick={() => count.publish(prev => prev - 1)}>-</button>
-      <button onClick={() => count.publish(prev => prev + 1)}>+</button>
+      <button onClick={() => count.set(prev => prev - 1)}>-</button>
+      <button onClick={() => count.set(prev => prev + 1)}>+</button>
     </div>
   )
 \}` }} />
@@ -56,8 +56,8 @@ export default function App() {
 \  useSuperState(count, { target: 'draft' }) // this line!\n
 \  return (
     <div>
-      <button onClick={() => count.set(prev => prev - 1)}>-</button>
-      <button onClick={() => count.set(prev => prev + 1)}>+</button>\n
+      <button onClick={() => count.sketch(prev => prev - 1)}>-</button>
+      <button onClick={() => count.sketch(prev => prev + 1)}>+</button>\n
 \
       {typeof count.draft() !== 'undefined' &&
         <section>
