@@ -1,5 +1,13 @@
 # @superstate/core
 
+## 0.0.3
+
+### Patch Changes
+
+- 8c8ef89: Several API changes
+- Updated dependencies [8c8ef89]
+  - @superstate/core@0.0.12
+
 ## 0.0.2
 
 ### Patch Changes
