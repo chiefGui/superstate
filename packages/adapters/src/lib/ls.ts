@@ -7,7 +7,7 @@ import { IMiddlewareInput } from '@superstate/core'
  * @param key The `localStorage` key to save to.
  */
 export function ls<S = any>(key: string) {
-  return ({ eventType, now, publish }: IMiddlewareInput<S>) => {
+  return ({ eventType, now, set }: IMiddlewareInput<S>) => {
     if (eventType === 'init') {
       const foundLocalStorageItem = localStorage.getItem(key)
 
@@ -15,12 +15,12 @@ export function ls<S = any>(key: string) {
         return
       }
 
-      publish(JSON.parse(foundLocalStorageItem))
+      set(JSON.parse(foundLocalStorageItem))
 
       return
     }
 
-    if (eventType === 'after:publish') {
+    if (eventType === 'after:change') {
       localStorage.setItem(key, JSON.stringify(now()))
     }
   }

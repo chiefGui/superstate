@@ -46,99 +46,120 @@ const colors = superstate(new Set(['Red', 'Yellow']))
 
 ## now
 
-The most accurate version of your state. The one your clients must trust the most.
+Returns the current value of your state.
 
 ```ts
 const count = superstate(0)
 
 console.log(count.now()) // 0
 
-count.publish(10)
+count.set(10)
 
 console.log(count.now()) // 10
 ```
 
 ## draft
 
-The draft version of your state. May be `undefined` if no draft is available. To set the value of the draft, call `.set()`.
+The draft version of your state. Will be `undefined` if no draft is available. To set the value of the draft, call `.sketch()`.
 
 ```ts
 const count = superstate(0)
 
 console.log(count.draft()) // undefined
 
-count.set(10)
+count.sketch(10)
 
 console.log(count.draft()) // 10
 ```
 
 :::info
-If you don't plan to use [Drafts](/getting-started/drafts), always use [now](#now) instead.
+If you don't plan to use [Drafts](/getting-started/drafts), always use [now()](#now) instead to get the value of your state.
 :::
-
-## publish
-
-Publishes the value passed in the input or the `draft`, if the input is `undefined`.
-It won't broadcast any changes if the previous `now` would be equal the new `now`.
-
-### Without `draft`
-
-You don't need to maintain a `draft` in order to `publish`. You can pass the value to publish directly to the function:
-
-```typescript
-const count = superstate(0)
-
-count.publish(1) // now === 1
-count.publish(prev => prev + 1) // now === 2
-```
-
-### With `draft`
-
-If you want to maintain a `draft`, you can `publish` without any arguments:
-
-```typescript
-const count = superstate(0)
-
-count.set(1) // draft === 1
-count.publish() // draft === undefined, now === 1
-```
-
-### Broadcast
-
-Every time you `.publish()`, changes will be broadcasted unless the previous `now` would be equal the new `now`
-or you pass the `true` to the `silent` option:
-
-```typescript
-const count = superstate(0)
-
-count.publish(1, { silent: true }) // won't be broadcasted
-```
 
 ## set
 
-Sets the value passed through `input` to the draft.
+Overrides the value of `now`, which is the current value of your state:
+
+```typescript
+const count = superstate(0)
+
+count.set(1) // now === 1
+```
+
+If you want to use the previous value as a reference:
+
+```typescript
+const count = superstate(0)
+
+count.set(prev => prev + 1) // now === 1
+count.set(prev => prev + 1) // now === 2
+```
+
+### Broadcast
+
+Whenever you `.set()`, changes will be broadcasted unless the new `now` is equal to the previous one,
+or you pass `true` to the `silent` option:
+
+```typescript
+const count = superstate(0)
+
+count.set(1, { silent: true }) // won't be broadcasted
+```
+
+## sketch
+
+Overrides the value of `draft`:
 
 ```ts
 const count = superstate(0)
 
-count.set(1) // if you want to override `draft`
-count.set(prev => prev + 1) // if you want to use the previous `draft`
+count.sketch(1) // `draft` === 1
+```
+
+And just like [`.set`](#set), you can use the previous `draft` as a reference:
+
+```ts
+const count = superstate(0)
+
+count.sketch(1) // `draft` === 1
+count.sketch(prev => prev + 1) // `draft` === 2
 ```
 
 :::info
-If you don't plan to use [Drafts](/getting-started/drafts), prefer to mutate your state with [publish](#publish) instead.
+If you don't plan to use [Drafts](/getting-started/drafts), prefer to mutate your state with [set](#set) instead.
 :::
 
 ### Broadcast
 
-Whenever you `.set()`, changes will be broadcasted unless the previous `draft` would be equal the new `draft`
-or you pass the `true` to the `silent` option:
+Whenever you `.sketch()`, changes will be broadcasted unless the new `draft` is equal to the previous one,
+or you pass `true` to the `silent` option:
 
 ```ts
 const count = superstate(0)
 
-count.set(1, { silent: true })
+count.sketch(1, { silent: true })
 ```
+
+Note that draft changes will only be broadcasted to draft subscribers. [Learn more &rarr;](/advanced/broadcasting#subscribing-to-changes)
+
+## publish
+
+When you have a `draft` ready to go, call `.publish()` to make it the new `now` value:
+
+```ts
+const count = superstate(0)
+
+count.sketch(1)
+console.log(count.draft()) // logs 1
+
+count.publish()
+console.log(count.draft()) // logs `undefined`
+console.log(count.now()) // logs 1
+```
+
+:::info
+Don't worry about publishing if you're not using [Drafts](/getting-started/drafts).
+:::
 
 ## discard
 
@@ -154,6 +175,8 @@ count.set(1) // draft === 1
 count.discard() // draft === undefined
 ```
 
+If there's no draft to discard, nothing is going to happen.
+
 ## subscribe
 
 Starts monitoring changes to the state.
@@ -163,17 +186,18 @@ const count = superstate(0)
 
 count.subscribe(value => console.log(value))
 
-count.publish(10) // this will trigger the subscribe callback
+count.set(10) // this will trigger the subscribe callback
 ```
 
 You can also subscribe to changes made to the `draft`:
 
-```ts
+```ts {3-4}
 const count = superstate(0)
 
+// Note the 'draft' at the line below
 count.subscribe(value => console.log(value), 'draft')
 
-count.set(10) // this will trigger the subscribe callback
+count.sketch(10) // this will trigger the subscribe callback
 ```
 
 ### unsubscribe
@@ -185,11 +209,11 @@ const count = superstate(0)
 
 const unsubscribe = count.subscribe(value => console.log(value))
 
-count.publish(10) // this will trigger the subscribe callback
+count.set(10) // this will trigger the subscribe callback
 
 unsubscribe() // stop listening to changes
 
-count.publish(10) // this wont trigger the subscribe callback
+count.set(10) // this wont trigger the subscribe callback
 ```
 
 ## unsubscribeAll
@@ -208,6 +232,11 @@ count.unsubscribeAll() // stop listening to changes
 
 count.publish(10) // this wont trigger the subscribe callback
 ```
+
+:::caution
+Only call this function if you know what you're doing. If possible, always prefer to unsubscribe
+to [particular subscriptions](#unsubscribe).
+:::
 
 ## extend
 

@@ -10,14 +10,14 @@ sidebar_position: 5
 ```typescript
 const count = superstate(0)
 
-count.publish(count + 1)
+count.set(count + 1)
 ```
 
 ✅ **Do:**
 ```typescript
 const count = superstate(0)
 
-count.publish(prev => prev + 1)
+count.set(prev => prev + 1)
 ```
 
 ## Abstract complex logic with Extensions
@@ -29,8 +29,9 @@ you don't abstract complex, not obvious logic into small, organized pieces. [Ext
 ```typescript
 const user = superstate({ firstName: 'John', lastName: 'Doe', slug: 'john-doe' })
 
-user.publish(prev => ({
+user.set(prev => ({
   ...prev,
+
   firstName: 'Hello',
   lastName: 'World',
   slug: slugify('Hello World')
@@ -39,8 +40,8 @@ user.publish(prev => ({
 
 ✅ **Do:**
 ```typescript
-function rename({ publish }, { firstName, lastName }) {
-  publish(prev => {
+function rename({ set }, { firstName, lastName }) {
+  set(prev => {
     ...prev,
 
     firstName,

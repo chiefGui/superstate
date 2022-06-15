@@ -10,27 +10,37 @@ describe('superstate', () => {
   })
 
   describe('set', () => {
-    test('assigns the value to the draft', () => {
+    test('assigns a new value to `now`', () => {
       const count = superstate(0)
 
       count.set(5)
+
+      expect(count.now()).toBe(5)
+    })
+  })
+
+  describe('sketch', () => {
+    test('assigns input value to draft', () => {
+      const count = superstate(0)
+
+      count.sketch(5)
 
       expect(count.draft()).toBe(5)
     })
 
-    test('assigns the value to the draft based on the previous `draft`', () => {
+    test('assigns input value to draft based on the previous `draft`', () => {
       const count = superstate(0)
 
-      count.set(5)
-      count.set((prev) => prev + 5)
+      count.sketch(5)
+      count.sketch((prev) => prev + 5)
 
       expect(count.draft()).toBe(10)
     })
 
-    test('assigns the value to the draft based on the previous `now`', () => {
+    test('assigns input value to draft based on the previous `now`', () => {
       const count = superstate(10)
 
-      count.set((prev) => prev + 10)
+      count.sketch((prev) => prev + 10)
 
       expect(count.draft()).toBe(20)
     })
@@ -38,7 +48,7 @@ describe('superstate', () => {
     test('assigns 0 to the value of the draft', () => {
       const count = superstate(10)
 
-      count.set(0)
+      count.sketch(0)
 
       expect(count.draft()).toBe(0)
     })
@@ -49,28 +59,28 @@ describe('superstate', () => {
       const subscriber = jest.fn()
       count.subscribe(subscriber, 'draft')
 
-      count.set(5, { silent: false })
+      count.sketch(5, { silent: false })
       expect(subscriber).toHaveBeenCalledTimes(1)
 
-      count.set(10, { silent: false })
+      count.sketch(10, { silent: false })
       expect(subscriber).toHaveBeenCalledTimes(2)
 
-      count.set(5, { silent: true })
+      count.sketch(5, { silent: true })
       expect(subscriber).toHaveBeenCalledTimes(2)
     })
 
-    test('assigns the value to the draft and publish in chain', () => {
+    test('assigns input value to draft and publish in chain', () => {
       const count = superstate(0)
 
-      count.set(5).publish()
+      count.sketch(5).publish()
 
       expect(count.now()).toBe(5)
     })
 
-    test('assigns the value to the draft and discard in chain', () => {
+    test('assigns input value to draft and discard in chain', () => {
       const count = superstate(0)
 
-      count.set(5).discard()
+      count.sketch(5).discard()
 
       expect(count.draft()).toBeUndefined()
       expect(count.now()).toBe(0)
@@ -78,10 +88,10 @@ describe('superstate', () => {
   })
 
   describe('publish', () => {
-    test('discards the draft after pubilsh', () => {
+    test('discards the draft after publish', () => {
       const count = superstate(0)
 
-      count.set(5)
+      count.sketch(5)
       expect(count.draft()).toBe(5)
 
       count.publish()
@@ -91,18 +101,10 @@ describe('superstate', () => {
     test('sets `now` to be the same value as `draft`', () => {
       const count = superstate(0)
 
-      count.set(5)
+      count.sketch(5)
       expect(count.now()).toBe(0)
 
       count.publish()
-      expect(count.now()).toBe(5)
-    })
-
-    test('sets `now` bypassing `draft`', () => {
-      const count = superstate(0)
-
-      count.publish(5)
-
       expect(count.now()).toBe(5)
     })
   })
@@ -111,7 +113,7 @@ describe('superstate', () => {
     test('discards the draft', () => {
       const count = superstate(0)
 
-      count.set(5)
+      count.sketch(5)
       expect(count.draft()).toBe(5)
 
       count.discard()
@@ -120,19 +122,6 @@ describe('superstate', () => {
   })
 
   describe('subscribe', () => {
-    test('reacts to `now` changes via set/publish', () => {
-      const count = superstate(0)
-
-      const sub = jest.fn()
-
-      count.subscribe(sub)
-
-      count.set(5)
-      count.publish()
-
-      expect(sub).toHaveBeenCalledTimes(1)
-    })
-
     test('reacts to `now` changes via publish', () => {
       const count = superstate(0)
 
@@ -140,21 +129,33 @@ describe('superstate', () => {
 
       count.subscribe(sub)
 
-      count.publish(5)
+      count.sketch(5)
+      count.publish()
 
       expect(sub).toHaveBeenCalledTimes(1)
     })
 
-    test('reacts to `now` when published is 0', () => {
+    test('reacts to `now` changes via `set`', () => {
       const count = superstate(0)
 
       const sub = jest.fn()
       count.subscribe(sub)
 
-      count.publish(1)
-      count.publish(2)
-      count.publish(3)
-      count.publish(0)
+      count.set(5)
+
+      expect(sub).toHaveBeenCalledTimes(1)
+    })
+
+    test('reacts to `now` when sets 0', () => {
+      const count = superstate(0)
+
+      const sub = jest.fn()
+      count.subscribe(sub)
+
+      count.set(1)
+      count.set(2)
+      count.set(3)
+      count.set(0)
 
       expect(sub).toHaveBeenCalledTimes(4)
     })
@@ -166,7 +167,7 @@ describe('superstate', () => {
 
       count.subscribe(sub, 'draft')
 
-      count.set(5)
+      count.sketch(5)
 
       expect(sub).toHaveBeenCalledTimes(1)
     })
@@ -177,10 +178,10 @@ describe('superstate', () => {
       const sub = jest.fn()
       count.subscribe(sub, 'draft')
 
-      count.set(1)
-      count.set(2)
-      count.set(3)
-      count.set(0)
+      count.sketch(1)
+      count.sketch(2)
+      count.sketch(3)
+      count.sketch(0)
 
       expect(sub).toHaveBeenCalledTimes(4)
     })
@@ -191,19 +192,19 @@ describe('superstate', () => {
       const sub = jest.fn()
 
       const unsub = count.subscribe(sub, 'draft')
-      count.set(5)
+      count.sketch(5)
       expect(sub).toHaveBeenCalledTimes(1)
 
       unsub()
-      count.set(5)
+      count.sketch(5)
       expect(sub).toHaveBeenCalledTimes(1)
     })
   })
 
   describe('extensions', () => {
-    test('publishes a new value', () => {
+    test('sets a new value to `now`', () => {
       const count = superstate(5).extend({
-        sum: ({ publish }, num: number) => publish((prev) => prev + num),
+        sum: ({ set }, num: number) => set((prev) => prev + num),
       })
 
       count.sum(10)
@@ -213,10 +214,10 @@ describe('superstate', () => {
 
     test('changes the draft based on prev draft', () => {
       const count = superstate(5).extend({
-        sum: ({ set }, num: number) => set((prev) => prev + num),
+        sum: ({ sketch }, num: number) => sketch((prev) => prev + num),
       })
 
-      count.set(10)
+      count.sketch(10)
       count.sum(5)
 
       expect(count.draft()).toBe(15)
@@ -224,38 +225,6 @@ describe('superstate', () => {
   })
 
   describe('middlewares', () => {
-    test('calls a middleware before publish', () => {
-      const mockFn = jest.fn()
-
-      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
-        if (eventType === 'before:publish') {
-          mockFn()
-        }
-      }
-
-      const count = superstate(0).use([fakeMiddleware])
-
-      count.publish(10)
-
-      expect(mockFn).toHaveBeenCalledTimes(1)
-    })
-
-    test('calls a middleware after publish', () => {
-      const mockFn = jest.fn()
-
-      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
-        if (eventType === 'after:publish') {
-          mockFn()
-        }
-      }
-
-      const count = superstate(0).use([fakeMiddleware])
-
-      count.publish(10)
-
-      expect(mockFn).toHaveBeenCalledTimes(1)
-    })
-
     test('calls a middleware before set', () => {
       const mockFn = jest.fn()
 
@@ -288,6 +257,134 @@ describe('superstate', () => {
       expect(mockFn).toHaveBeenCalledTimes(1)
     })
 
+    test('calls a middleware before sketch', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'before:sketch') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.sketch(10)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware after sketch', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'after:sketch') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.sketch(10)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware before publish', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'before:publish') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.sketch(10).publish()
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware after publish', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'after:sketch') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.sketch(10).publish()
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware before change (via set)', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'before:change') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.set(10)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware after change (via set)', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'after:change') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.set(10)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware before change (via publish)', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'before:change') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.sketch(10).publish()
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
+    test('calls a middleware after change (via publish)', () => {
+      const mockFn = jest.fn()
+
+      const fakeMiddleware = ({ eventType }: IMiddlewareInput<number>) => {
+        if (eventType === 'after:change') {
+          mockFn()
+        }
+      }
+
+      const count = superstate(0).use([fakeMiddleware])
+
+      count.sketch(10).publish()
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+    })
+
     test('calls a middleware before discard', () => {
       const mockFn = jest.fn()
 
@@ -299,7 +396,7 @@ describe('superstate', () => {
 
       const count = superstate(0).use([fakeMiddleware])
 
-      count.set(10)
+      count.sketch(10)
       count.discard()
 
       expect(mockFn).toHaveBeenCalledTimes(1)
@@ -316,7 +413,7 @@ describe('superstate', () => {
 
       const count = superstate(0).use([fakeMiddleware])
 
-      count.set(10)
+      count.sketch(10)
       count.discard()
 
       expect(mockFn).toHaveBeenCalledTimes(1)
@@ -333,7 +430,7 @@ describe('superstate', () => {
 
       const count = superstate(0).use([fakeMiddleware])
 
-      count.publish(30)
+      count.set(30)
 
       expect(mockFn).toHaveBeenCalledTimes(1)
     })
@@ -349,7 +446,7 @@ describe('superstate', () => {
 
       const count = superstate(0).use([fakeMiddleware])
 
-      count.publish(25)
+      count.set(25)
 
       expect(mockFn).toHaveBeenCalledTimes(1)
     })
@@ -365,7 +462,7 @@ describe('superstate', () => {
 
       const count = superstate(0).use([fakeMiddleware])
 
-      count.set(30)
+      count.sketch(30)
 
       expect(mockFn).toHaveBeenCalledTimes(1)
     })
@@ -381,7 +478,7 @@ describe('superstate', () => {
 
       const count = superstate(0).use([fakeMiddleware])
 
-      count.set(25)
+      count.sketch(25)
 
       expect(mockFn).toHaveBeenCalledTimes(1)
     })
@@ -397,7 +494,7 @@ describe('superstate', () => {
 
       const count = superstate(0).use([fakeMiddleware])
 
-      count.publish(30, { silent: true })
+      count.set(30, { silent: true })
 
       expect(mockFn).toHaveBeenCalledTimes(0)
     })
@@ -413,7 +510,7 @@ describe('superstate', () => {
 
       const count = superstate(0).use([fakeMiddleware])
 
-      count.publish(25, { silent: true })
+      count.set(25, { silent: true })
 
       expect(mockFn).toHaveBeenCalledTimes(0)
     })
@@ -429,7 +526,7 @@ describe('superstate', () => {
 
       const count = superstate(0).use([fakeMiddleware])
 
-      count.set(30, { silent: true })
+      count.sketch(30, { silent: true })
 
       expect(mockFn).toHaveBeenCalledTimes(0)
     })
@@ -445,7 +542,7 @@ describe('superstate', () => {
 
       const count = superstate(0).use([fakeMiddleware])
 
-      count.set(25, { silent: true })
+      count.sketch(25, { silent: true })
 
       expect(mockFn).toHaveBeenCalledTimes(0)
     })

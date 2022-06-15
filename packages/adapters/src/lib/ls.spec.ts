@@ -6,7 +6,15 @@ describe('ls', () => {
   test('stores to localStorage when publish', () => {
     const count = superstate(0).use([ls('count')])
 
-    count.publish(5)
+    count.sketch(5).publish()
+
+    expect(localStorage.getItem('count')).toBe('5')
+  })
+
+  test('stores to localStorage when set', () => {
+    const count = superstate(0).use([ls('count')])
+
+    count.set(5)
 
     expect(localStorage.getItem('count')).toBe('5')
   })
@@ -17,10 +25,12 @@ describe('ls', () => {
       posts: [{ title: 'hello world' }],
     }).use([ls('user')])
 
-    user.publish((prev) => ({
-      ...prev,
-      posts: [...prev.posts, { title: 'goodbye world' }],
-    }))
+    user
+      .sketch((prev) => ({
+        ...prev,
+        posts: [...prev.posts, { title: 'goodbye world' }],
+      }))
+      .publish()
 
     expect(
       JSON.parse(localStorage.getItem('user') as string).posts

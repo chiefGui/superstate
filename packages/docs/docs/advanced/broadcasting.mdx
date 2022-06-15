@@ -10,7 +10,7 @@ If you want to do something when your state changes, broadcasting is the way to 
 
 To start listening to a **superstate**, you have to subscribe to it:
 
-```ts
+```ts {5-7}
 import { superstate } from '@superstate/core'
 
 const count = superstate(0)
@@ -20,15 +20,15 @@ count.subscribe(newNow => {
 })
 ```
 
-And then, if you publish something:
+And then, if you set something:
 
 ```ts
-count.publish(1)
+count.set(1)
 ```
 
 The `console.log(newNow)` will be called.
 
-By default, your subscriptions will target changes made to `now`. If you want to listen for changes made to the [draft state](/getting-started/drafts):
+By default, your subscriptions will target changes made to `now`. If you want to listen for changes made to the [draft](/getting-started/drafts):
 
 ```ts {3}
 count.subscribe(newDraft => {
@@ -45,7 +45,7 @@ count.subscribe(newDraft => {
 ```
 
 :::info Remember
-If your subscription is targeting a `draft`, only changes made via `.set()` will be caught. [Learn more &rarr;](/getting-started/drafts)
+If your subscription is targeting a `draft`, only changes made via `.sketch()` will be caught. [Learn more &rarr;](/getting-started/drafts)
 :::
 
 ## Unsubscribing
@@ -79,11 +79,13 @@ There are two exceptions for when changes won't be broadcasted.
 One is if the next state value is the same as the previous one&mdash;**superstate** understands that nothing has changed,
 hence there's no reason to broadcast.
 
-The other exception is when you explictly specify `{ silent: true }` to either your `.publish()` or `.set()` calls:
+The other exception is when you explictly specify `{ silent: true }` to your mutation methods. For example:
 
 ```ts
-count.publish(1, { silent: true }) // this won't broadcast
-count.set(1, { silent: true }) // this won't broadcast
+count.set(1, { silent: true }) // will not broadcast
+count.sketch(1, { silent: true }) // will not broadcast
+count.publish({ silent: true }) // will not broadcast
+count.discard({ silent: true }) // will not broadcast
 ```
 
 ## React

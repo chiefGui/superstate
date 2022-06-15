@@ -43,10 +43,10 @@ The example above has a few benefits:
 
 From the example above, to create an extension that sums your `count`:
 
-```typescript
+```ts {1-5}
 const count = superstate(0).extend({
-  sum({ publish }, amount: number) {
-    publish(prev => prev + amount)
+  sum({ set }, amount: number) {
+    set(prev => prev + amount)
   }
 })
 
@@ -57,8 +57,8 @@ count.sum(5) // `count.now()` will log 7
 
 Let's understand what's happening here:
 
-```typescript
-sum({ publish }, amount: number) {
+```ts
+sum({ set }, amount: number) {
   publish(prev => prev + amount)
 }
 ```
@@ -67,27 +67,32 @@ sum({ publish }, amount: number) {
 
 is the name of your extension.
 
-> `{ publish }`
+> `{ set }`
 
-is an object **superstate** gives us with helpful properties to interact with the extension and with the state itself. `publish` is one of them.
+is a [`superstate` object](/api-reference/@superstate/core/superstate), which exposes the `set` method.
 
-:::danger Caution
-The first parameter of an extension should always be reserved to this object **superstate** passes to it.
+:::danger
+The first parameter of an extension should always be reserved to the `superstate` object.
 :::
 
 > `amount: number`
 
-a custom, accepted parameter by the `.sum()` function. This is completely up to us to define and we can have as many parameters
-as we like.
+a custom parameter of the `.sum()` function. This is completely up to us to define and we can have as many parameters
+as we like. For example:
+
+```ts {1}
+sum({ set }, x: number, y: number, z: number) {
+  set(x + y + z)
+}
+```
 
 :::info
 The "`: number`" piece is TypeScript. You can omit it when writing vanilla JavaScript.
 :::
 
-> `publish(prev => prev + amount)`
+> `set(prev => prev + amount)`
 
-The same `.publish()` function as if you'd call `count.publish(10)`.
-
+The regular [`set`](/api-reference/@superstate/core/superstate#set) function exposed by a `superstate` object.
 
 ## Computed values
 
@@ -111,10 +116,8 @@ const user =
   superstate({ firstName: 'John', lastName: 'Doe' })
     .extend({ fullName })
 
-function fullName({ draft, now }) {
-  // Prioritizes the `draft`'s' version of the user;
-  // If it doesn't exist, let's use the `now`'s version.
-  const _user = draft ?? now
+function fullName({ now }) {
+  const _user = now()
 
   return `${_user.firstName} ${_user.lastName}`
 }
@@ -128,7 +131,7 @@ Just to give you another use-case for computed values:
 const money = superstate(100).extend({ formatted })
 
 function formatted({ now, draft }) {
-  return `$${draft || now}`
+  return `$${now()}`
 }
 
 console.log(money.formatted()) // logs $100
@@ -141,9 +144,9 @@ You can also handle side effects within your extension's scope:
 
 ```typescript
 const count = superstate(0).extend({
-  sum({ publish, draft, now }, amount: number) {
-    const next = amount + (draft ?? now)
-    publish(next)
+  sum({ set, now }, amount: number) {
+    const next = now() + amount
+    set(next)
 
     // Feel free to do whatever you like.
     alert(`count has changed to ${next}.`)

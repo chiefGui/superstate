@@ -21,7 +21,7 @@ console.log(count.now()) // logs 0
 And to change what `count` should be:
 
 ```typescript
-count.publish(5)
+count.set(5)
 
 console.log(count.now()) // logs 5
 ```
@@ -39,12 +39,12 @@ const user = superstate({
 })
 ```
 
-And if you want to edit the role of the `user`:
+And if you want to edit the role of the `user` (or really, any other property):
 
-```ts
+```ts {3}
 console.log(user.now().role) // logs 'admin'
 
-user.publish(prev => ({ ...prev, role: 'editor' }))
+user.set(prev => ({ ...prev, role: 'editor' }))
 
 console.log(user.now().role) // logs 'editor'
 ```

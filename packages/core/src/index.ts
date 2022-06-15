@@ -17,7 +17,7 @@ export function superstate<S>(initialState: S): ISuperState<S> {
 
   const _draftMethods: ISuperStateDraftMethods<S> = {
     draft,
-    set,
+    sketch,
     publish,
     discard,
   }
@@ -25,6 +25,7 @@ export function superstate<S>(initialState: S): ISuperState<S> {
   const _methods: ISuperState<S> = {
     ..._draftMethods,
 
+    set,
     now,
     subscribe,
     extend,
@@ -40,45 +41,83 @@ export function superstate<S>(initialState: S): ISuperState<S> {
     return _draft
   }
 
-  function set(input: ISetInput<S>, options?: ISetOptions) {
-    const clone = _cloneObj(_draft || _now)
-
-    _executeMiddlewares({ eventType: 'before:set' })
-
-    const prevDraft = _draft
-    _draft = _isMutator(input) ? input(clone) : input
-
-    if (!options?.silent && !deepEqual(prevDraft, _draft)) {
-      _broadcastDraft()
+  function set(
+    input: IMutateInput<S>,
+    options?: IMutateOptions
+  ): ISuperState<S> {
+    if (typeof input === 'undefined' && typeof _draft === 'undefined') {
+      return _methods
     }
 
+    const prevNow = _now
+    const newNow = _mutate(_now, input)
+
+    if (deepEqual(prevNow, newNow)) {
+      return _methods
+    }
+
+    _executeMiddlewares({ eventType: 'before:set' })
+    _overrideNow(newNow)
     _executeMiddlewares({ eventType: 'after:set' })
 
-    return _draftMethods
+    if (!options?.silent) {
+      _broadcast()
+
+      return _methods
+    }
+
+    return _methods
   }
 
-  function publish(input?: ISetInput<S>, options?: ISetOptions) {
-    if (typeof input === 'undefined' && typeof _draft === 'undefined') {
-      return
+  function publish(options?: IMutateOptions): ISuperState<S> {
+    if (typeof _draft === 'undefined') {
+      return _methods
+    }
+
+    const prevNow = _now
+    const newNow = _draft
+
+    if (deepEqual(prevNow, newNow)) {
+      return _methods
     }
 
     _executeMiddlewares({ eventType: 'before:publish' })
-
-    const prev = _now
-
-    if (input) {
-      set(input, { silent: true })
-    }
-
-    _now = _draft as S
+    _overrideNow(newNow)
+    _executeMiddlewares({ eventType: 'after:publish' })
 
     discard()
 
-    if (!options?.silent && !deepEqual(prev, _now)) {
+    if (!options?.silent) {
       _broadcast()
+
+      return _methods
     }
 
-    _executeMiddlewares({ eventType: 'after:publish' })
+    return _methods
+  }
+
+  function sketch(
+    input: IMutateInput<S>,
+    options?: IMutateOptions
+  ): ISuperState<S> {
+    const prevDraft = _draft
+    const newDraft = _mutate(_draft ?? _now, input)
+
+    if (deepEqual(prevDraft, newDraft)) {
+      return _methods
+    }
+
+    _executeMiddlewares({ eventType: 'before:sketch' })
+    _draft = newDraft
+    _executeMiddlewares({ eventType: 'after:sketch' })
+
+    if (!options?.silent) {
+      _broadcastDraft()
+
+      return _methods
+    }
+
+    return _methods
   }
 
   function subscribe(
@@ -100,13 +139,22 @@ export function superstate<S>(initialState: S): ISuperState<S> {
       ])
   }
 
-  function discard() {
+  function discard(options?: IMutateOptions): ISuperState<S> {
+    if (typeof _draft === 'undefined') {
+      return _methods
+    }
+
     _executeMiddlewares({ eventType: 'before:discard' })
-
     _draft = undefined
-    _broadcastDraft()
-
     _executeMiddlewares({ eventType: 'after:discard' })
+
+    if (!options?.silent) {
+      _broadcastDraft()
+
+      return _methods
+    }
+
+    return _methods
   }
 
   function unsubscribeAll() {
@@ -126,6 +174,18 @@ export function superstate<S>(initialState: S): ISuperState<S> {
     extensions: E
   ): ISuperState<S> & IExtensionMethods<S, E> {
     return { ..._methods, ..._prepareExtensions(extensions) }
+  }
+
+  function _overrideNow(newNow: S) {
+    _executeMiddlewares({ eventType: 'before:change' })
+    _now = newNow
+    _executeMiddlewares({ eventType: 'after:change' })
+  }
+
+  function _mutate(value: S | IDraft<S>, input: IMutateInput<S>) {
+    const clone = _cloneObj(value)
+
+    return _isMutator(input) ? input(clone) : input
   }
 
   function _executeMiddlewares(
@@ -167,13 +227,7 @@ export function superstate<S>(initialState: S): ISuperState<S> {
   }
 
   function _getExtensionProps(): IExtensionPropsBag<S> {
-    return {
-      draft,
-      set,
-      publish,
-      discard,
-      now: _cloneObj(_now),
-    }
+    return _methods
   }
 
   function _broadcast() {
@@ -219,15 +273,22 @@ function _cloneObj<S>(inputState: S) {
   return JSON.parse(JSON.stringify(inputState))
 }
 
-function _isMutator<S>(value: ISetInput<S>): value is (prev: S) => S {
+function _isMutator<S>(value: IMutateInput<S>): value is (prev: S) => S {
   return typeof value === 'function'
 }
 
 export interface ISuperState<S> extends ISuperStateDraftMethods<S> {
   /**
-   * @returns The most accurate value of your state. The one your clients must trust the most.
+   * @returns The current value of the state.
    */
   now: () => S
+
+  /**
+   * Mutates the value of `now`. If the input is `undefined`, it uses the `draft` value instead.
+   *
+   * It won't broadcast any changes if the previous `now` would be equal the new `now`.
+   */
+  set: ISetFn<S>
 
   /**
    * Starts monitoring changes to the state.
@@ -274,32 +335,30 @@ export interface ISuperStateDraftMethods<S> {
   draft: IDraftFn<S>
 
   /**
+   * Overrides the value of `now` with the value of `draft`.
+   *
+   * If `draft` is `undefined`, nothing will happen.
+   *
+   * If `draft` is equals to `now`, nothing will happen either.
+   */
+  publish: () => ISuperState<S>
+
+  /**
    * Discards the draft, setting its value to `undefined`.
    * Upon calling this function, a draft broadcast will occur.
    */
-  discard: IDiscardFn
+  discard: IDiscardFn<S>
 
   /**
-   * Publishes the value passed in the input or the `draft`, if the input is `undefined`.
-   *
-   * It won't broadcast any changes if the previous `now` would be equal the new `now`.
-   */
-  publish: IPublishFn<S>
-
-  /**
-   * Sets the value passed through `input` to the draft.
-   *
-   * This function won't broadcast a draft change if the previous value is equal to the new value.
+   * Assigns the value passed via `input` to `draft`.
    *
    * @param input It can be a raw value or a function whose first and sole argument is the value of the previous `draft`. In case there is no previous draft, the first argument will be the previous value of `now`.
    * @param options.silent (default: `false`) Whether to broadcast the change.
    */
-  set: ISetFn<S>
+  sketch: ISketchFn<S>
 }
 
-export type IExtensionPropsBag<S> = ISuperStateDraftMethods<S> & {
-  now: S
-}
+export type IExtensionPropsBag<S> = ISuperState<S>
 
 /**
  * The type of the draft.
@@ -308,8 +367,8 @@ export type IExtensionPropsBag<S> = ISuperStateDraftMethods<S> & {
  */
 export type IDraft<S> = S | undefined
 
-type ISetInput<S> = ((prev: S) => S) | S
-type ISetOptions = {
+type IMutateInput<S> = ((prev: S) => S) | S
+type IMutateOptions = {
   /**
    * Whether to broadcast the change or not.
    *
@@ -334,12 +393,15 @@ type IExtensionMethods<S, E extends IExtensions<S>> = {
 
 type IUnsubscribe = () => void
 
+type ISketchFn<S> = (
+  input: IMutateInput<S>,
+  options?: IMutateOptions
+) => ISuperState<S>
 type ISetFn<S> = (
-  input: ISetInput<S>,
-  options?: ISetOptions
-) => ISuperStateDraftMethods<S>
-type IPublishFn<S> = (input?: ISetInput<S>, options?: ISetOptions) => void
-type IDiscardFn = () => void
+  input: IMutateInput<S>,
+  options?: IMutateOptions
+) => ISuperState<S>
+type IDiscardFn<S> = () => ISuperState<S>
 type IDraftFn<S> = () => IDraft<S>
 type IUseFn<S> = (middlewares: IMiddleware<S>[]) => ISuperState<S>
 
@@ -351,10 +413,14 @@ export type IMiddlewareInput<S = any> = ISuperState<S> & {
 type IMiddleware<S> = (input: IMiddlewareInput<S>) => void
 type IMiddlewareEventType =
   | 'init'
-  | 'before:publish'
-  | 'after:publish'
   | 'before:set'
   | 'after:set'
+  | 'before:sketch'
+  | 'after:sketch'
+  | 'before:publish'
+  | 'after:publish'
+  | 'before:change'
+  | 'after:change'
   | 'before:discard'
   | 'after:discard'
   | 'before:broadcast:now'

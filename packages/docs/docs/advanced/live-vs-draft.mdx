@@ -14,7 +14,7 @@ they exist and why (or when) you should use them. Let's go over the basics.
 ```typescript
 const count = superstate(0)
 
-count.publish(5)
+count.set(5)
 ```
 
 The above is what you would expect of any state management library: you define a state, set its initial value (`0`),
@@ -87,14 +87,14 @@ Let's see the same example with **superstate**:
 export default function App() {
 \  useSuperState(user)\n
 \
-\  const live = user.now()
+\  const _user = user.now()
 \  const draft = user.draft()\n
 \
 \  return (
     <div>
       <section style={{ marginBottom: 20 }}>
-        Hello <strong>{live.name}</strong>.<br/>
-        <small>@{slugify(live.name, { lower: true })}</small>
+        Hello <strong>{_user.name}</strong>.<br/>
+        <small>@{slugify(_user.name, { lower: true })}</small>
       </section>\n
 \
       {draft && (

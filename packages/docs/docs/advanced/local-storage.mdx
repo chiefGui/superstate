@@ -29,7 +29,7 @@ yarn add @superstate/adapters
 
 And plug the `ls` adapter into your **superstate**:
 
-```typescript
+```typescript {4-6}
 import { superstate } from '@superstate/core'
 import { ls } from '@superstate/adapters'
 
@@ -41,7 +41,7 @@ const count = superstate(0).use([
 Now, whenever `now` changes, its value will be persisted against the `localStorage`:
 
 ```typescript
-count.publish(5)
+count.set(5)
 
 console.log(localStorage.getItem('count')) // logs 5
 ```

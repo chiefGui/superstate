@@ -9,9 +9,9 @@ Middlewares are implicit methods to deal with side effects of your superstates.
 Let's say we want to display an `alert` whenever a `superstate` changes. One simple way to achieve it would be through
 a simple Middleware:
 
-```typescript
+```ts
 function myMiddleware({ eventType }) {
-  if (eventType === 'after:publish') {
+  if (eventType === 'after:change') {
     alert('hello world!')
 
     return
@@ -20,7 +20,7 @@ function myMiddleware({ eventType }) {
 
 const count = superstate(0).use([myMiddleware])
 
-count.publish(10) // here your `alert()` would be called
+count.set(10) // here your `alert()` would be called
 ```
 
 And honestly, Middlewares are that simple!
@@ -34,10 +34,14 @@ Here's a list of all the available event types:
 
 ```
 init
-before:publish
-after:publish
 before:set
 after:set
+before:sketch
+after:sketch
+before:publish
+after:publish
+before:change
+after:change
 before:discard
 after:discard
 before:broadcast:now
@@ -64,28 +68,38 @@ const count = superstate(0).use([initMiddleware]) // the `alert()` would be call
 
 May be important to note that `init` won't ever be called again despite this very first time.
 
+### `before:change` and `after:change`
+
+Just like `init`, these `change` events are special, because it has two different instigators.
+
+It'll be triggered when...
+- you `.publish()` successfully and/or,
+- you `.set()` successfully.
+
+:::info
+Note that the `change` event will not trigger for changes made to the draft. If you are interested on draft events,
+please use `before:sketch` and `after:sketch`.
+:::
+
 ### Before/After events
 
 As you may have noticed, some events are prefixed with `before:` or `after:`.
 
-These events will be executed within the scope of the trigger, except it occurs before or after the trigger has achieved
-its task.
+These events will only trigger when an action was successfully achieved, and only before/after the action itself.
 
 To illustrate an example, `before:publish` occurs when you call `.publish()`, but *before* the publish method has published
 your changes; at the same time, `after:publish` also occurs when you call `.publish()`, except it will be executed *after*
-the publish method has published your changes.
-
-The above is true for the other events as well, such as `set` and `broadcast`.
+the publish method has published your changes. Both `before:publish` and `after:publish` will only occur if publishing was successful.
 
 ## Advanced Middlewares
 
 `eventType` is not the only property exposed to Middlewares. Actually, Middlewares have access to the exact same functions
-a `superstate` has, such as `publish`, `set`, `discard`, etc [(Learn more)](/api-reference/@superstate/core/superstate). To illustrate you an example:
+a `superstate` object has, such as `publish`, `set`, `discard`, etc [(Learn more)](/api-reference/@superstate/core/superstate). To illustrate you an example:
 
 ```typescript
 function myMiddleware({ eventType, set, now }) {
   if (eventType === 'after:publish') {
-    set(now())
+    sketch(now())
   }
 }
 
@@ -94,7 +108,7 @@ const count = superstate(0).use([myMiddleware])
 count.publish(5)
 ```
 
-The Middleware above will assign to your draft the value of `now()`, which is `5`, every time you `.publish()` something.
+The Middleware above will assign your draft with the value of `now()`, which is `5`, every time you `.publish()` something.
 
 :::danger Infinite loop!
 If you call `publish()` inside a Middleware that does something after you `publish()`, expect an infinite loop. That said, don't do that!
