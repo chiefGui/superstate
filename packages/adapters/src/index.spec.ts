@@ -3,6 +3,8 @@ import { superstate } from '@superstate/core'
 import { ls } from '.'
 
 describe('ls', () => {
+  afterEach(() => localStorage.clear())
+
   test('stores to localStorage when publish', () => {
     const count = superstate(0).use([ls('count')])
 
@@ -47,5 +49,41 @@ describe('ls', () => {
     const count = superstate(0).use([ls('count')])
 
     expect(count.now()).toBe(5)
+  })
+
+  test('stores draft on localStorage', () => {
+    const count = superstate(0).use([ls('count', { draft: true })])
+
+    count.sketch(5)
+
+    expect(localStorage.getItem('count__draft')).toBe('5')
+  })
+
+  test('removes localStorage draft item upon discard', () => {
+    const count = superstate(0).use([ls('count', { draft: true })])
+
+    count.sketch(5)
+    expect(localStorage.getItem('count__draft')).toBe('5')
+
+    count.discard()
+    expect(localStorage.getItem('count__draft')).toBe(null)
+  })
+
+  test('removes localStorage draft item upon publish', () => {
+    const count = superstate(0).use([ls('count', { draft: true })])
+
+    count.sketch(5)
+    expect(localStorage.getItem('count__draft')).toBe('5')
+
+    count.publish()
+    expect(localStorage.getItem('count__draft')).toBe(null)
+  })
+
+  test('sets draft from localStorage', () => {
+    localStorage.setItem('count__draft', '10')
+
+    const count = superstate(0).use([ls('count', { draft: true })])
+
+    expect(count.draft()).toBe(10)
   })
 })

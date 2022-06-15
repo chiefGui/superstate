@@ -13,11 +13,9 @@ export function ls<S = any>(key: string, options?: ILSOptions) {
     if (eventType === 'init') {
       const foundNowAtLocalStorage = localStorage.getItem(key)
 
-      if (!foundNowAtLocalStorage) {
-        return
+      if (foundNowAtLocalStorage) {
+        set(JSON.parse(foundNowAtLocalStorage))
       }
-
-      set(JSON.parse(foundNowAtLocalStorage))
 
       if (options?.draft) {
         const foundDraftAtLocalStorage = localStorage.getItem(
