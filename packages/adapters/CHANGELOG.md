@@ -1,5 +1,11 @@
 # @superstate/core
 
+## 0.0.4
+
+### Patch Changes
+
+- a1196e4: Add draft support to ls adapter
+
 ## 0.0.3
 
 ### Patch Changes
