@@ -46,11 +46,16 @@ count.set(5)
 console.log(localStorage.getItem('count')) // logs 5
 ```
 
+:::danger Limitation
+Currently, only objects serializeable by `JSON.stringify()` are supported.
+:::
+
 ## Initial value
 
-When `ls` is plugged into your state, its initial value will be whatever is stored in the `localStorage` under the key you specified. For example:
+When `ls` is plugged into your state, its initial value will be whatever is stored in the `localStorage` under the key you specified.
+For example:
 
-```typescript
+```ts
 localStorage.setItem('count', 5)
 
 const count = superstate(0).use([
@@ -60,7 +65,14 @@ const count = superstate(0).use([
 console.log(count.now()) // logs 5
 ```
 
-## Limitations
+## Persisting drafts
 
-- Currently, only `JSON.stringify()`-able objects can be persisted.
-- The `ls` adapter will not persist `draft` state.
+If you'd like to persist your drafts alongside the published (`now`) value of your state, you can do so by passing `true` to the `draft` option of `ls`:
+
+```ts
+const count = superstate(0).use([
+  ls('count', { draft: true })
+])
+```
+
+This way, every time your `draft` changes, it'll be persisted against the localStorage as well.
