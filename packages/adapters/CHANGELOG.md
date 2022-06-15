@@ -1,5 +1,11 @@
 # @superstate/core
 
+## 0.0.5
+
+### Patch Changes
+
+- 58d770c: Fix localStorage adapter not updating draft upon sketch
+
 ## 0.0.4
 
 ### Patch Changes
