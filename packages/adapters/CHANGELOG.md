@@ -1,5 +1,11 @@
 # @superstate/core
 
+## 0.0.6
+
+### Patch Changes
+
+- e9d5f0c: Change the way ls is exported
+
 ## 0.0.5
 
 ### Patch Changes
