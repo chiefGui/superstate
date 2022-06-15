@@ -1,6 +1,6 @@
 import { superstate } from '@superstate/core'
 
-import { ls } from './ls'
+import { ls } from '.'
 
 describe('ls', () => {
   test('stores to localStorage when publish', () => {

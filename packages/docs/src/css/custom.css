@@ -66,6 +66,10 @@ article p {
   @apply text-lg text-gray-50;
 }
 
+article li {
+  @apply text-lg text-gray-50;
+}
+
 article strong {
   @apply text-white;
 }
