@@ -1,5 +1,11 @@
 # @superstate/core
 
+## 0.0.7
+
+### Patch Changes
+
+- 5a53d99: remove draft ls after discard
+
 ## 0.0.6
 
 ### Patch Changes
