@@ -135,3 +135,7 @@ aside > div > a:first-child {
 .admonition-content p {
   @apply !text-base;
 }
+
+hr {
+  @apply border-gray-800
+}
