@@ -1,6 +1,6 @@
 {
   "name": "@superstate/adapters",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Adapters to use with superstate",
   "main": "src/index.ts",
   "publishConfig": {
@@ -19,7 +19,7 @@
     "directory": "packages/adapters"
   },
   "peerDependencies": {
-    "@superstate/core": "^0.0.12"
+    "@superstate/core": "^0.0.13"
   },
   "keywords": [
     "state",
