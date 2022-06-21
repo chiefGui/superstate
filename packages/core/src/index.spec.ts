@@ -222,6 +222,14 @@ describe('superstate', () => {
 
       expect(count.draft()).toBe(15)
     })
+
+    test('returns a computed value', () => {
+      const user = superstate({ firstName: 'John', lastName: 'Doe' }).extend({
+        fullName: ({ now }) => `${now().firstName} ${now().lastName}`,
+      })
+
+      expect(user.fullName()).toBe('John Doe')
+    })
   })
 
   describe('middlewares', () => {

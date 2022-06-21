@@ -211,7 +211,7 @@ export function superstate<S>(initialState: S): ISuperState<S> {
         ...prev,
 
         [extensionKey]: (...params: IExtensionUserParams) => {
-          const result: IExtensionOutput<S> = extensions[extensionKey](
+          const result = extensions[extensionKey](
             _getExtensionProps(),
             ...params
           )
@@ -220,7 +220,7 @@ export function superstate<S>(initialState: S): ISuperState<S> {
             return
           }
 
-          return _draftMethods
+          return result
         },
       }
     }, {} as IExtensionMethods<S, E>)
@@ -380,15 +380,14 @@ type IMutateOptions = {
 }
 type ISubscriber<S> = (newState: S) => void
 
-type IExtensionOutput<S> = S | void | undefined | ISuperStateDraftMethods<S>
 type IExtensionUserParams = any[]
 type IExtensionAllParams<S> = [IExtensionPropsBag<S>, ...IExtensionUserParams]
-type IExtension<S> = (...params: IExtensionAllParams<S>) => IExtensionOutput<S>
+type IExtension<S, O = void> = (...params: IExtensionAllParams<S>) => O
 type IExtensions<S> = Record<string, IExtension<S>>
 type IExtensionMethods<S, E extends IExtensions<S>> = {
   [key in keyof E]: (
     ...params: DropFirst<Parameters<E[key]>>
-  ) => ISuperStateDraftMethods<S>
+  ) => ReturnType<E[key]>
 }
 
 type IUnsubscribe = () => void
