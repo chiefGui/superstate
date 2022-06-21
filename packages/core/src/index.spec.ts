@@ -1,6 +1,14 @@
 import { IMiddlewareInput, superstate } from '.'
 
 describe('superstate', () => {
+  test('supports nested superstates', () => {
+    const hp = superstate(100)
+    const attributes = superstate({ hp })
+    const hero = superstate({ attributes })
+
+    expect(hero.now().attributes.now().hp.now()).toBe(100)
+  })
+
   describe('now', () => {
     test('returns initial value', () => {
       const count = superstate(0)
