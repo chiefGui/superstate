@@ -1,16 +1,24 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 ---
 
 # Good Practices
 
 ## Mutating the state based on its previous value
 
+You don't want to use `count.now()` when referring to the previous value of your state when
+mutating it because depending on how you program your application, that value may be inaccurate, i.e.
+in asynchronous contexts.
+
+The safest way to update your state based on its previous value is passing a function to `.set()`, where
+the first argument is the current value of your state and making its return to be the next value you want
+your state to be.
+
 ❌ **Don't:**
 ```typescript
 const count = superstate(0)
 
-count.set(count + 1)
+count.set(count.now() + 1)
 ```
 
 ✅ **Do:**
@@ -60,3 +68,35 @@ user.rename({ firstName: 'Hello', lastName: 'World' })
 :::info Types!
 Extensions are seamlessly integrated with TypeScript. They show up in your editor's autocomplete as well as their arguments. Take advantage of it!
 :::
+
+## Keep your state serializable
+
+Don't populate your superstates with non-serializable data, such as function, classes, etc.
+**superstate** expects its contents to be as agnostic as possible, so data can be handled
+in an unopinionated fashion. For example, [localStorage persistency](/advanced/local-storage) wouldn't be
+possible out of the box if data was not serializable. [Learn more.](https://en.wikipedia.org/wiki/Serialization)
+
+❌ **Don't:**
+```ts {5-7}
+const user = superstate({
+  firstName: 'John',
+  lastName: 'Doe',
+  slug: 'john-doe',
+  save() {
+    // Your save function.
+  }
+})
+```
+
+✅ **Do:**
+```ts {1,2,3,9}
+function save() {
+  // Your save function.
+}
+
+const user = superstate({
+  firstName: 'John',
+  lastName: 'Doe',
+  slug: 'john-doe'
+}).extend({ save })
+```

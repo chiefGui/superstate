@@ -50,3 +50,11 @@ console.log(user.now().role) // logs 'editor'
 ```
 
 Believe it or not: that's it! Now go build something awesome!
+
+## Technical Overview
+
+Under the hood, what **superstate** does is wrapping your state within a variable and
+enforcing queries and mutations to happen respectively through the `.now()` and `.set()` methods.
+
+This allows **superstate** to keep track of what's going on with your state, and to keep your
+app posted about changes made to it as well.

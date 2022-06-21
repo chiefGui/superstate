@@ -1,0 +1,57 @@
+---
+sidebar_position: 4
+---
+
+# Nesting
+
+Nesting states is perfectly doable and encouraged. Let's say you are building a game where you
+have a `hero`, and this hero have `attributes`:
+
+```tsx
+import { superstate } from '@superstate/core'
+
+const hp = superstate(100)
+const hero = superstate({ attributes: { hp } })
+
+hero.now().attributes.hp.set(prev => prev - 50)
+```
+
+You can use [Extensions](/getting-started/extensions) to make your life easier by creating handy helper functions:
+
+```tsx
+const hp =
+  superstate(100)
+    .extend({
+      increase({ set }, amount: number) {
+        set(prev => prev + amount)
+      },
+
+      decrease({ set }, amount: number) {
+        set(prev => prev - amount)
+      },
+    })
+
+const attributes = { hp }
+
+const hero =
+  superstate({ attributes })
+    .extend({
+      get({ now }, attributeKey: keyof typeof attributes) {
+        return now()[attributeKey].now()
+      },
+
+      heal({ set, now }, amount: number) {
+        now().attributes.hp.increase(amount)
+      },
+
+      takeDamage({ set, now }, amount: number) {
+        now().attribuets.hp.decrease(amount)
+      },
+    })
+
+hero.takeDamage(50)
+hero.heal(25)
+
+console.log(hero.get('hp'))
+```
+

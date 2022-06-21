@@ -9,7 +9,7 @@
    
 ### Behold your next favorite state management library for the XXI century.
   
-[Quick Start](https://superstate.dev/getting-started/first-state) · [Examples](https://superstate.dev/examples) · [Documentation](https://superstate.dev) · [API Reference](https://superstate.dev/api-reference/@superstate/core/superstate)
+[Quick Start](https://superstate.dev/getting-started/first-state) · [Documentation](https://superstate.dev) · [Examples](https://superstate.dev/examples) · [API Reference](https://superstate.dev/api-reference/@superstate/core/superstate)
 </div>
 
 ---
@@ -20,7 +20,7 @@ yarn add @superstate/core
 
 ---
 
-#### ✨ **Simple, sleek, intuitive & elegant API**
+#### ✨ **Simple, sleek & elegant API**
 
 ```ts
 import { superstate } from '@superstate/core'
@@ -34,7 +34,7 @@ console.log(count.now()) // 5
 
 _Yep, that simple. No PhD required._
 
-#### 🤯 Sharing/reusing state across files, components, etc is mindless
+#### 🤯 Mindlessly easy to share state across your entire app
 
 ```ts
 // count.ts
