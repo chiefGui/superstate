@@ -1,5 +1,12 @@
 # @superstate/core
 
+## 0.0.8
+
+### Patch Changes
+
+- Updated dependencies [cefee5b]
+  - @superstate/core@0.0.13
+
 ## 0.0.7
 
 ### Patch Changes
