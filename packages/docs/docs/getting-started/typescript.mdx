@@ -1,0 +1,21 @@
+---
+sidebar_position: 6
+---
+
+# TypeScript
+**superstate** is entirely written in TypeScript, so there's no need for additional setup or steps to get started.
+
+### Explicitly typing the value of a superstate
+```typescript
+const user = superstate<User>({
+  id: 'asdf',
+  name: 'John Doe',
+  email: 'john@doe.com'
+})
+
+interface User {
+  id: string
+  name: string
+  email: string
+}
+```

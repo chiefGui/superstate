@@ -1,0 +1,83 @@
+---
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
+
+# Automatic localStorage persistency
+
+Install the `@superstate/adapters` package:
+
+<Tabs>
+<TabItem value="bash" label="npm">
+
+```bash
+npm install @superstate/adapters
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn add @superstate/adapters
+```
+
+</TabItem>
+</Tabs>
+
+
+And plug the `ls` adapter into your **superstate**:
+
+```typescript {4-6}
+import { superstate } from '@superstate/core'
+import { ls } from '@superstate/adapters'
+
+const count = superstate(0).use([
+  ls('count') // 'count' is the localStorage key
+])
+```
+
+Now, whenever `now` changes, its value will be persisted against the `localStorage`:
+
+```typescript
+count.set(5)
+
+console.log(localStorage.getItem('count')) // logs 5
+```
+
+:::danger Limitation
+Currently, only data serializeable by `JSON.stringify()` are supported.
+:::
+
+## Initial value
+
+When `ls` is plugged into your state, its initial value will be whatever is stored in the `localStorage` under the key you specified.
+For example:
+
+```ts
+localStorage.setItem('count', 5)
+
+const count = superstate(0).use([
+  ls('count') // 'count' is the key
+])
+
+console.log(count.now()) // logs 5
+```
+
+## Persisting drafts
+
+If you'd like to persist your drafts alongside the published (`now`) value of your state, you can do so by passing `true` to the `draft` option of `ls`:
+
+```ts
+const count = superstate(0).use([
+  ls('count', { draft: true })
+])
+```
+
+This way, every time your `draft` changes, it'll be persisted against the localStorage as well.
+
+:::info
+The key of drafts on localStorage are preffixed by `__draft`. If your key is `count`, then the draft version of it
+on localStorage would be `count__draft`
+:::

@@ -1,0 +1,182 @@
+---
+sidebar_position: 3
+---
+
+# Drafts
+One of the key and most opionionated feature of **superstate** is the built-in draft management.
+Drafts are preliminatory versions of your state that you are free to mutate without impacting
+the final user.
+
+To illustrate the concept of drafts to you: when you're typing a text message to someone, the said text is just
+a draft as long as you don't submit it. While the text is just a draft, you're free to change it as much as you like.
+
+## Creating a draft
+To create a draft, call the `.sketch()` method:
+
+```ts {3}
+const count = superstate(0)
+
+count.sketch(5)
+```
+
+The `.sketch()` method will assign `5` to the `draft` of `count`.
+
+### Updating an existing draft
+```ts {4}
+const count = superstate(0)
+
+count.sketch(5) // draft is 5
+count.sketch(prev => prev + 5) // draft is 10
+```
+
+:::warning
+Always prefer to [`.discard()`](#discarding-a-draft) a draft when you no longer want it instead of `.sketch(undefined)` because
+`.discard()` does more than just set the draft's value to `undefined`.
+
+However, for whatever reason, if you literally just want the `.draft()` to become `undefined`, feel free to `.sketch(undefined)`.
+:::
+
+## Reading a draft
+
+To display the draft version of a superstate, you simply have to call `.draft()`:
+
+```typescript {5}
+const count = superstate(0)
+
+count.sketch(20)
+
+console.log(count.draft()) // logs 20
+```
+
+
+## Publishing a draft
+
+When you change the value of a draft (by calling `.sketch(5)`, for example), this change is intentionally not propagated to `.now()` and only exists in `.draft()`.
+In order to publish it, guess what, you gotta call `.publish()`:
+
+```ts {4}
+const count = superstate(0)
+
+count.sketch(20)
+count.publish()
+```
+
+Or, if you want a shorter version, chaining is available:
+
+```ts {3}
+const count = superstate(0)
+
+count.sketch(20).publish()
+```
+
+After you call `.publish()`, **superstate** does a few things:
+
+1. Assigns the value of the `draft` to `now`,
+2. disposes the value of `.draft()`, making it become `undefined`,
+3. broadcasts the change to all the subscribers. (See [Broadcasting](/advanced/broadcasting))
+
+If you want to skip the broadcast part, just pass `{ silent: true }` to `publish`:
+
+```ts {3}
+const count = superstate(0)
+
+count.sketch(20).publish({ silent: true })
+```
+
+### Discarding a draft
+Let's say you made changes to your draft but in the end you changed your mind. Super fine&mdash;discarding drafts is simple:
+
+```typescript {4}
+const count = superstate(0)
+
+count.sketch(10)
+count.discard() // Nah, 10 is not enough!
+
+count.sketch(20)
+count.publish() // Yeah, 20 it is!
+```
+
+When discarding, changes will be broadcasted unless you pass `true` to the `silent` option:
+
+```ts {3}
+const count = superstate(0)
+
+count.sktech(10).discard({ silent: true })
+```
+
+:::info
+If you discard an `undefined` draft, nothing will happen.
+:::
+
+## Monitoring draft changes
+If you like to do something whenever a draft changes, you can subscribe to your state's draft by passing `'draft'` as the second argument
+of the `.subscribe()` function:
+
+```ts {5}
+const count = superstate(0)
+
+count.subscribe(value => {
+  console.log(value)
+}, 'draft') // <--- here!
+```
+
+:::info
+By default, `.subscribe()` will only listen to `.now()` changes.
+:::
+
+If you no longer want to listen to draft changes:
+
+```typescript {2,4}
+const count = superstate(0)
+const unsubscribe = count.subscribe(console.log, 'draft')
+
+unsubscribe()
+
+// Now, you can safely mutate the draft that
+// no changes will be broadcasted.
+```
+
+### What changes are broadcasted?
+
+Changes are only broadcasted if the new value of the draft is different from the previous value. With that in mind:
+
+- Whenever `.sketch(value)` is called,
+- and/or whenever `.publish()` is called,
+- and/or whenever `.discard()` is called.
+
+:::info
+No matter how complex the value of `draft()` is, **superstate** will deep compare the previous value with the next value,
+to make sure changes are only broadcasted when needed.
+:::
+
+If you don't want changes to be broadcasted at all, most of the mutation functions allow you to pass the `{ silent: true }` option:
+
+```ts {3-5}
+const count = superstate(0)
+
+count.sketch(5, { silent: true })
+count.discard({ silent: true })
+count.publish({ silent: true })
+```
+
+## `undefined` drafts
+
+If your state doesn't have a draft version, `undefined` will be returned when trying to read it through `.draft()`:
+
+```typescript
+const count = superstate(0)
+
+console.log(count.draft()) // logs `undefined`
+```
+
+You might be wondering why and/or when a draft is `undefined`. Well, the idea is that `superstate` aims to be as respectful
+as possible with your user's memory usage. In short, **superstate** only issues
+drafts when needed and disposes them when no longer needed.
+
+### Draft disposal
+
+`.draft()` will return `undefined` when:
+
+- You haven't `.sketch()` anything,
+- after you call `.discard()` or
+- after you call `.publish()`.

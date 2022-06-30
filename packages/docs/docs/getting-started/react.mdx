@@ -1,0 +1,103 @@
+---
+sidebar_position: 5
+---
+
+import { Code } from '../../src/components/code'
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
+
+# React
+Integrating **superstate** with React is easy.
+
+First you have to install `@superstate/react`:
+
+<Tabs>
+<TabItem value="bash" label="npm">
+
+```bash
+npm install @superstate/react
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn add @superstate/react
+```
+
+</TabItem>
+</Tabs>
+
+Then you'll be able to import the `useSuperState` hook:
+
+<Code files={{ '/App.tsx': `import { superstate } from '@superstate/core'\nimport { useSuperState } from '@superstate/react'
+\nconst count = superstate(0)
+\nexport default function App() {
+\  useSuperState(count)\n
+\  return (
+    <div>
+      Count is <strong>{count.now()}</strong><br/>\n
+      <button onClick={() => count.set(prev => prev - 1)}>-</button>
+      <button onClick={() => count.set(prev => prev + 1)}>+</button>
+    </div>
+  )
+\}` }} />
+
+## Targeting specific state version
+
+By default, the `useSuperState` hook will re-render your React component whenever either `now` or `draft` change.
+However, sometimes you want to monitor only changes made to the `draft` instead. To do so, all you have to do is
+specifying `draft` as a `useSuperState` target:
+
+<div style={{ paddingBottom: '1rem' }}>
+<Code files={{ '/App.tsx': `import { superstate } from '@superstate/core'\nimport { useSuperState } from '@superstate/react'
+\nconst count = superstate(0)\n
+export default function App() {
+\  useSuperState(count, { target: 'draft' }) // this line!\n
+\  return (
+    <div>
+      <button onClick={() => count.sketch(prev => prev - 1)}>-</button>
+      <button onClick={() => count.sketch(prev => prev + 1)}>+</button>\n
+\
+      {typeof count.draft() !== 'undefined' &&
+        <section>
+          Count's draft is: <strong>{count.draft()}</strong><br/>
+        </section>
+      }
+    </div>
+  )
+\}` }} />
+</div>
+
+If you want to target only `now` version instead of both `now` and `draft`, just pass `now` to `target`.
+
+## Smart re-renders
+It may sound dangerous to always re-render your component whenever a state changes, but don't worry&mdash;a re-render will
+only occur when changes are broadcasted, and changes are only broadcasted when the new state is actually different from the
+previous state.
+
+Meaning that:
+
+```typescript
+const count = superstate(0)
+count.publish(5) // will trigger a re-render
+count.publish(5) // will NOT trigger a re-render
+count.publish(5) // will NOT trigger a re-render
+count.publish(prev => prev) // will NOT trigger a re-render
+count.publish(prev => prev + 1) // will trigger a re-render
+
+const user = superstate({ name: 'John' })
+user.publish(prev => prev) // will NOT trigger a re-render
+user.publish(prev => ({ name: 'Doe' })) // will trigger a re-render
+```
+
+*Currently, custom logic to trigger broadcasts/re-render is not supported.*
+
+
+## Components rendering twice
+
+If your component is rendering twice upon a **superstate** state change, it may be because of React's `<StrictMode />`.
+Just to make sure, unwrap your app from `<StrictMode />` and try changing the state again.
+
+If the problem went away, put your `<StrictMode />` back and don't worry&mdash;this doubled re-render is only happening in development mode and it's intentional [(learn more)](https://reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects);
+otherwise, [file an issue on GitHub](https://github.com/chiefGui/superstate).

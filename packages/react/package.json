@@ -1,0 +1,36 @@
+{
+  "name": "@superstate/react",
+  "version": "0.0.19",
+  "description": "superstate for React apps",
+  "main": "src/index.ts",
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/react",
+    "registry": "https://registry.npmjs.org"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Guilherme \"chiefGui\" Oderdenge"
+  },
+  "bugs": "https://github.com/chiefGui/superstate",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chiefGui/superstate.git",
+    "directory": "packages/react"
+  },
+  "dependencies": {
+    "@superstate/core": "^0.0.13"
+  },
+  "peerDependencies": {
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0"
+  },
+  "keywords": [
+    "state",
+    "state management",
+    "global state",
+    "data",
+    "react state management",
+    "react state"
+  ]
+}

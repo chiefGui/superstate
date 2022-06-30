@@ -1,0 +1,141 @@
+@import "../../../../tw/style.css";
+
+* {
+  font-variant-ligatures: none;
+}
+
+html, body {
+  background: black;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  @apply tracking-tighter;
+}
+
+h1,h2,h3,h4,h5,h6,p,a,button,li {
+  @apply font-sans;
+}
+
+.container {
+  @apply md:!py-[6.3rem];
+}
+
+.table-of-contents__left-border {
+  @apply border-gray-800;
+}
+
+
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: theme(colors.yellow.600);
+  --ifm-code-font-size: 95%;
+  --ifm-font-size-base: 1.2rem;
+}
+
+.docusaurus-highlight-code-line {
+  background-color: rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+}
+
+html[data-theme='dark'] .docusaurus-highlight-code-line {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+
+article header h1 {
+  @apply text-4xl text-yellow-600;
+}
+
+article h2 {
+  @apply text-2xl;
+}
+
+article h3 {
+  @apply text-xl;
+}
+
+article p {
+  @apply text-lg text-gray-50;
+}
+
+article li {
+  @apply text-lg text-gray-50;
+}
+
+article strong {
+  @apply text-white;
+}
+
+article {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+aside {
+  @apply !border-gray-800;
+}
+
+aside > div > a:first-child {
+  @apply mx-8 my-4;
+}
+
+.navbar {
+  @apply md:hidden;
+}
+
+.menu__list-item:last-child {
+  @apply pb-6;
+}
+
+.menu__link {
+  @apply px-6 text-xs text-gray-100;
+}
+
+.menu__link--active {
+  @apply text-yellow-600 !bg-transparent;
+}
+
+.menu__link:hover {
+  @apply !bg-transparent;
+}
+
+.menu__link--sublist:after {
+  background: var(--ifm-menu-link-sublist-icon) 50%/1.2rem 1.2rem;
+}
+
+.menu__caret {
+  @apply !px-6 hover:bg-transparent;
+}
+
+.menu__caret:before {
+  background: var(--ifm-menu-link-sublist-icon) 50%/1.2rem 1.2rem;
+}
+
+.pagination-nav__link {
+  @apply border-gray-800;
+}
+
+.pagination-nav__sublabel {
+  display: none;
+}
+
+.pagination-nav__label {
+  @apply text-xs;
+}
+
+.admonition-content p {
+  @apply !text-base;
+}
+
+hr {
+  @apply border-gray-800
+}

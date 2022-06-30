@@ -1,0 +1,150 @@
+---
+sidebar_position: 5
+---
+
+import { Code } from '../../src/components/code'
+
+# "now" or "draft"?
+
+At this point you may have heard of [Drafts](/getting-started/drafts), but you may not understand why exactly
+they exist and why (or when) you should use them. Let's go over the basics.
+
+**superstate**'s API is, in fact, very simple:
+
+```typescript
+const count = superstate(0)
+
+count.set(5)
+```
+
+The above is what you would expect of any state management library: you define a state, set its initial value (`0`),
+and mutate it (to `5`) when needed.
+
+However, this is not always enough when it comes to real-life applications.
+
+An ordinary example of a real-life application is when you want to confirm a user's action before you actually submit it.
+A good example may be editting a user's profile:
+
+<div style={{ paddingBottom: '1rem' }}>
+<Code deps={{ slugify: '1.6.5' }} files={{ '/App.tsx': `import { useState } from 'react'\nimport slugify from 'slugify'\n
+export default function App() {
+\  const [name, setName] = useState('John Doe')
+\  const [draftName, setDraftName] = useState('')
+\  const [isConfirming, setIsConfirming] = useState(false)\n
+\
+\  return (
+\    <div>
+\      <section style={{ marginBottom: 20 }}>
+\        Hello <strong>{name}</strong>.<br/>
+\        <small>@{slugify(name, { lower: true })}</small><br/>
+\      </section>\n
+\
+\      {isConfirming && (
+\        <div style={{ marginBottom: 20 }}>
+\          <p>
+\            You sure? Your name will become <strong>{draftName}</strong> and
+\            your slug will be <strong>@{slugify(draftName, { lower: true })}</strong>.
+\          </p>\n
+\
+\          <div>
+\            <button onClick={() => setIsConfirming(false)}>Cancel</button>
+\            <button
+\              onClick={() => {
+\                setIsConfirming(false)
+\                setName(draftName)
+\                setDraftName('')
+\              }}
+\            >
+\              Confirm
+\            </button>
+\          </div>
+\        </div>
+\      )}\n
+\
+\      <form onSubmit={async (e) => {
+\        e.preventDefault()
+\
+\        setDraftName(e.target.elements.name.value)
+\        setIsConfirming(true)
+\      }}>
+\        <input placeholder='Type a new name' name='name' />\n
+\
+\        <button type='submit'>Submit</button>
+\      </form>
+\    </div>
+\  )
+\}` }} />
+</div>
+
+Although there are plenty of ways to achieve the above with less verbosity and complexity,
+it'd be better if you wouldn't have to worry about it at all.
+
+Let's see the same example with **superstate**:
+
+<div style={{ paddingBottom: '1rem' }}>
+<Code deps={{ slugify: '1.6.5' }} files={{ '/App.tsx': `import { superstate } from '@superstate/core'\nimport { useSuperState } from '@superstate/react'\nimport slugify from 'slugify'
+\nconst user = superstate({ name: 'John Doe' })\n
+export default function App() {
+\  useSuperState(user)\n
+\
+\  const _user = user.now()
+\  const draft = user.draft()\n
+\
+\  return (
+    <div>
+      <section style={{ marginBottom: 20 }}>
+        Hello <strong>{_user.name}</strong>.<br/>
+        <small>@{slugify(_user.name, { lower: true })}</small>
+      </section>\n
+\
+      {draft && (
+        <div style={{ marginBottom: 20 }}>
+          <p>
+            You sure? Your name will become <strong>{draft.name}</strong> and
+            your slug will be <strong>@{slugify(draft.name, { lower: true })}</strong>.
+          </p>\n
+\
+          <div>
+            <button onClick={() => user.discard()}>Cancel</button>
+            <button onClick={() => user.publish()}>Confirm</button>
+          </div>
+        </div>
+      )}\n
+\
+      <form onSubmit={e => {
+        e.preventDefault()
+\
+        user.set(prev => ({ ...prev, name: e.target.elements.name.value }))
+      }}>
+        <input placeholder='Type a new name' name='name' />\n
+        <button type='submit'>Submit</button>
+      </form>
+    </div>
+  )
+\}` }} />
+</div>
+
+We can observe a few things from the example above:
+
+#### Less lines of code
+The same functionality was achieved with both codes. However, with **superstate** it required less lines of code and it felt
+more ergonomic.
+
+#### Easy to keep it consistent
+If your app has several places where you need user's confirmation before making a change go live, you don't have to worry
+about abstracting things and/or consistency. **superstate** takes care of it for you.
+
+#### Instant better UX
+Have you tried to submit the same name twice? In the example without **superstate**, it allows users to submit the same
+name no matter what&mdash;you have to implement your own diff algorithm to prevent this.
+
+In the other hand, **superstate** is smarter. It won't give false hopes to the user nor stress your API if a change wouldn't
+make sense.
+
+### The veredict
+
+`now` and `draft` serve different purposes. `now` is meant to express the official version of your state; `draft` is meant
+to represent a "work-in-progress" version of your state that may change before going live.
+
+If your application doesn't care about giving users second chances, thus improving its usability, then don't bother
+with `draft` at all. Otherwise, `draft` will be at your service.

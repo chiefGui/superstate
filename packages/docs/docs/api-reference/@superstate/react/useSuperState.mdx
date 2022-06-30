@@ -1,0 +1,31 @@
+---
+sidebar_position: 1
+---
+
+# useSuperState
+
+A React hook that re-renders the component when a `superstate` changes.
+
+```tsx
+import { superstate } from '@superstate/core'
+import { useSuperState } from '@superstate/react'
+
+const count = superstate(0)
+
+export function MyComponent() {
+  useSuperState(count)
+
+  return <div>{count.now()}</div>
+}
+```
+
+You can also re-render only when a specific state changes:
+
+*Defaults to `all`*
+
+
+```ts
+useSuperState(count, { target: 'now' })
+useSuperState(count, { target: 'draft' })
+useSuperState(count, { target: 'all' })
+```

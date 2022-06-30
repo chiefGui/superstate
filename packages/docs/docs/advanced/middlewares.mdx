@@ -1,0 +1,140 @@
+---
+sidebar_position: 2
+---
+
+# Middlewares
+
+Middlewares are implicit methods to deal with side effects of your superstates.
+
+Let's say we want to display an `alert` whenever a `superstate` changes. One simple way to achieve it would be through
+a simple Middleware:
+
+```ts
+function myMiddleware({ eventType }) {
+  if (eventType === 'after:change') {
+    alert('hello world!')
+
+    return
+  }
+}
+
+const count = superstate(0).use([myMiddleware])
+
+count.set(10) // here your `alert()` would be called
+```
+
+And honestly, Middlewares are that simple!
+
+## Event Types
+
+One of the most important aspects of a Middleware is the `eventType` property `superstate` passes to it. The `eventType`
+helps you decide what to do and when.
+
+Here's a list of all the available event types:
+
+```
+init
+before:set
+after:set
+before:sketch
+after:sketch
+before:publish
+after:publish
+before:change
+after:change
+before:discard
+after:discard
+before:broadcast:now
+after:broadcast:now
+before:broadcast:draft
+after:broadcast:draft
+```
+
+### The `init` event type
+
+The `init` event type is executed once when a Middleware is successfully attached to a **superstate**:
+
+```typescript
+function initMiddleware({ eventType }) {
+  if (eventType === 'init') {
+    alert('initMiddleware was installed successfully!')
+
+    return
+  }
+}
+
+const count = superstate(0).use([initMiddleware]) // the `alert()` would be called here.
+```
+
+May be important to note that `init` won't ever be called again despite this very first time.
+
+### `before:change` and `after:change`
+
+Just like `init`, these `change` events are special, because it has two different instigators.
+
+It'll be triggered when...
+- you `.publish()` successfully and/or,
+- you `.set()` successfully.
+
+:::info
+Note that the `change` event will not trigger for changes made to the draft. If you are interested on draft events,
+please use `before:sketch` and `after:sketch`.
+:::
+
+### Before/After events
+
+As you may have noticed, some events are prefixed with `before:` or `after:`.
+
+These events will only trigger when an action was successfully achieved, and only before/after the action itself.
+
+To illustrate an example, `before:publish` occurs when you call `.publish()`, but *before* the publish method has published
+your changes; at the same time, `after:publish` also occurs when you call `.publish()`, except it will be executed *after*
+the publish method has published your changes. Both `before:publish` and `after:publish` will only occur if publishing was successful.
+
+## Advanced Middlewares
+
+`eventType` is not the only property exposed to Middlewares. Actually, Middlewares have access to the exact same functions
+a `superstate` object has, such as `publish`, `set`, `discard`, etc [(Learn more)](/api-reference/@superstate/core/superstate). To illustrate you an example:
+
+```typescript
+function myMiddleware({ eventType, set, now }) {
+  if (eventType === 'after:publish') {
+    sketch(now())
+  }
+}
+
+const count = superstate(0).use([myMiddleware])
+
+count.publish(5)
+```
+
+The Middleware above will assign your draft with the value of `now()`, which is `5`, every time you `.publish()` something.
+
+:::danger Infinite loop!
+If you call `publish()` inside a Middleware that does something after you `publish()`, expect an infinite loop. That said, don't do that!
+:::
+
+## When Middlewares make sense
+
+From [Wikipedia](https://en.wikipedia.org/wiki/Middleware):
+
+> Middleware is a type of computer software that provides services to software applications beyond those available from the operating system. It can be described as "software glue".
+>
+> Middleware makes it easier for software developers to implement communication and input/output, so they can focus on the specific purpose of their application.
+
+To name you a practical example of where a Middleware can be useful, the [localStorage adapter](/advanced/local-storage) is a Middleware.
+Instead of having to manually write/read to/from localStorage, a Middleware was written to do that for us.
+
+If you need to automate something in your superstates, Middlewares can be the answer.
+
+## TypeScript
+
+```typescript
+function myMiddleware<T = number>(input: IMiddlewareInput<T>): void {
+  // ... your function
+}
+
+const count = superstate(0).use([myMiddleware])
+```
+
+*Feel free to change `T = number` to whatever you need.*

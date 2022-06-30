@@ -1,0 +1,117 @@
+---
+sidebar_position: 2
+---
+
+# Your first superstate
+
+It's time to have fun. Let's create a superstate that stores a number:
+
+```typescript
+import { superstate } from '@superstate/core'
+
+const count = superstate(0)
+```
+
+To display what `count` looks like:
+
+```typescript
+console.log(count.now()) // logs 0
+```
+
+And to change what `count` should be:
+
+```typescript
+count.set(5)
+
+console.log(count.now()) // logs 5
+```
+
+## A more real-world example
+
+```ts
+const user = {
+  state: superstate({
+    firstName: 'John',
+    lastName: 'Doe',
+    role: 'user',
+    posts: []
+  }),
+
+  rename: (firstName: string, lastName: string) => user.state.set({ firstName, lastName }),
+  promote: (newRole: Role) => user.state.set({ role: newRole }),
+  post: (newPost: Post) => user.state.set({ posts: [...user.state.now().posts, newPost] }),
+
+  fullName: () => `${user.state.now().firstName} ${user.state.now().lastName}`,
+  isAdmin: () => user.state.now().role === Role.Admin
+  getPostsAmount: () => user.state.now().posts.length
+}
+
+enum Role {
+  Admin = 'admin',
+  Role = 'role'
+}
+
+interface User {
+  firstName: string
+  lastName: string
+  role: Role
+  posts: Post[]
+}
+
+interface Post {
+  id: string
+  title: string
+}
+```
+
+:::info
+TypeScript in often used in the exmaples, but it's not required. If you're using vanilla JavaScript, just
+ignore all the interfaces, enums, etc.
+:::
+
+Now you can do things like:
+
+```ts
+user.rename('Jane Doe')
+user.promote(Role.Admin)
+user.post({ id: '1', title: 'Hello world' })
+
+console.log(user.fullName()) // logs `Jane Doe`
+console.log(user.isAdmin()) // logs `true`
+console.log(user.getPostsAmount()) // logs `1`
+```
+
+And if you want to monitor when the state changes:
+
+```ts
+user.state.subscribe((state) => {
+  alert('Hey! The user state changed!')
+})
+```
+
+:::info React?
+If you want to do something inside a React component when the state changes, please read our [React documentation](/getting-started/react).
+:::
+
+## Technical Overview
+
+Under the hood, what **superstate** does is wrapping your state within a variable and
+enforcing queries and mutations to happen respectively through the `.now()` and `.set()` methods.
+
+This allows **superstate** to keep track of what's going on with your state, and to keep your
+app posted about changes made to it as well.
+
+## An introductory video
+
+You are a better learner when watching videos? Perhaps you'd like to know there's a commented version of the [Notifications System example](/examples/notifications-system)
+available as well. Check it out:
+
+<iframe
+  width='100%'
+  height='415'
+  src='https://www.youtube.com/embed/nSXYhOTTXg4'
+  title='YouTube video player'
+  frameborder='0'
+  allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+  allowfullscreen
+/>

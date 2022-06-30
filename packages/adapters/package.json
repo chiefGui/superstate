@@ -1,0 +1,32 @@
+{
+  "name": "@superstate/adapters",
+  "version": "0.0.8",
+  "description": "Adapters to use with superstate",
+  "main": "src/index.ts",
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/adapters",
+    "registry": "https://registry.npmjs.org"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Guilherme \"chiefGui\" Oderdenge"
+  },
+  "bugs": "https://github.com/chiefGui/superstate",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chiefGui/superstate.git",
+    "directory": "packages/adapters"
+  },
+  "peerDependencies": {
+    "@superstate/core": "^0.0.13"
+  },
+  "keywords": [
+    "state",
+    "state management",
+    "global state",
+    "data",
+    "react state management",
+    "react state"
+  ]
+}
