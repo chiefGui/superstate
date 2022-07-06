@@ -1,4 +1,5 @@
 import { IMiddlewareInput } from '@superstate/core'
+import { isRunningOnServer, panic } from '@/util'
 
 const LS_DRAFT_SUFFIX = '__draft'
 
@@ -10,11 +11,17 @@ const LS_DRAFT_SUFFIX = '__draft'
  */
 export function ls<S = any>(key: string, options?: ILSOptions) {
   return ({ eventType, now, set, sketch, draft }: IMiddlewareInput<S>) => {
-    if (typeof document === 'undefined') {
-      return
-    }
-
     if (eventType === 'init') {
+      if (isRunningOnServer()) {
+        return panic({
+          message: {
+            what: 'Currently, the `ls` adapter is not supported on the server or server-side rendered applications.',
+            solutions: ['Remove the `ls()` middleware from your superstate.'],
+            references: ['https://superstate.dev/advanced/local-storage'],
+          },
+        })
+      }
+
       const foundNowAtLocalStorage = localStorage.getItem(key)
 
       if (foundNowAtLocalStorage) {
