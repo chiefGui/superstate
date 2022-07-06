@@ -10,6 +10,10 @@ const LS_DRAFT_SUFFIX = '__draft'
  */
 export function ls<S = any>(key: string, options?: ILSOptions) {
   return ({ eventType, now, set, sketch, draft }: IMiddlewareInput<S>) => {
+    if (typeof document === 'undefined') {
+      return
+    }
+
     if (eventType === 'init') {
       const foundNowAtLocalStorage = localStorage.getItem(key)
 
