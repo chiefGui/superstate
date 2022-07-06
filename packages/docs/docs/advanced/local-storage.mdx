@@ -7,6 +7,11 @@ import TabItem from '@theme/TabItem'
 
 # Automatic localStorage persistency
 
+:::danger SSR not supported!
+The localStorage adapter currently does not support server-side rendered applications and will throw an
+exception when run on the server.
+:::
+
 Install the `@superstate/adapters` package:
 
 <Tabs>
@@ -26,7 +31,6 @@ yarn add @superstate/adapters
 </TabItem>
 </Tabs>
 
-
 And plug the `ls` adapter into your **superstate**:
 
 ```typescript {4-6}
@@ -34,7 +38,7 @@ import { superstate } from '@superstate/core'
 import { ls } from '@superstate/adapters'
 
 const count = superstate(0).use([
-  ls('count') // 'count' is the localStorage key
+  ls('count'), // 'count' is the localStorage key
 ])
 ```
 
@@ -59,7 +63,7 @@ For example:
 localStorage.setItem('count', 5)
 
 const count = superstate(0).use([
-  ls('count') // 'count' is the key
+  ls('count'), // 'count' is the key
 ])
 
 console.log(count.now()) // logs 5
@@ -70,9 +74,7 @@ console.log(count.now()) // logs 5
 If you'd like to persist your drafts alongside the published (`now`) value of your state, you can do so by passing `true` to the `draft` option of `ls`:
 
 ```ts
-const count = superstate(0).use([
-  ls('count', { draft: true })
-])
+const count = superstate(0).use([ls('count', { draft: true })])
 ```
 
 This way, every time your `draft` changes, it'll be persisted against the localStorage as well.
