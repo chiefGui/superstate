@@ -3,10 +3,6 @@ module.exports = {
     extend: {
       colors: require('./colors'),
 
-      fontFamily: {
-        sans: ['Plus Jakarta Sans', 'ui-sans-serif'],
-      },
-
       backgroundImage: {
         conic: 'conic-gradient(var(--tw-gradient-stops))',
         'conic-to-t': 'conic-gradient(at top, var(--tw-gradient-stops))',
@@ -57,11 +53,6 @@ module.exports = {
         19: 'repeat(19, minmax(0, 1fr))',
         20: 'repeat(20, minmax(0, 1fr))',
         fluid: 'repeat(auto-fit, minmax(12rem, 1fr))',
-      },
-
-      container: {
-        center: true,
-        padding: '2rem',
       },
     },
   },

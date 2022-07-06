@@ -5,6 +5,7 @@
     "adapters": "packages/adapters",
     "core": "packages/core",
     "docs": "packages/docs",
+    "next-notifications": "examples/next-notifications",
     "react": "packages/react"
   }
 }
