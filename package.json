@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build:core": "nx build core --configuration=production",
+    "build:adapters": "nx build adapters --configuration=production",
     "test:core": "nx test core"
   },
   "alias": {
@@ -23,7 +24,6 @@
     "@mdx-js/loader": "^2.1.1",
     "@mdx-js/react": "^1.6.21",
     "@next/mdx": "^12.1.6",
-    "@nrwl/next": "14.2.4",
     "clsx": "^1.1.1",
     "core-js": "^3.6.5",
     "next": "12.1.5",
@@ -48,6 +48,7 @@
     "@nrwl/js": "^14.2.4",
     "@nrwl/linter": "^14.2.4",
     "@nrwl/next": "^14.2.4",
+    "@nrwl/node": "^14.4.2",
     "@nrwl/react": "^14.3.1",
     "@nrwl/storybook": "^14.2.4",
     "@nrwl/web": "^14.2.4",
@@ -57,7 +58,7 @@
     "@types/edit-json-file": "^1.7.0",
     "@types/jest": "27.4.1",
     "@types/lodash": "^4.14.182",
-    "@types/node": "16.11.7",
+    "@types/node": "^18.0.3",
     "@types/react": "18.0.8",
     "@types/react-dom": "18.0.3",
     "@types/react-scroll": "^1.8.3",
