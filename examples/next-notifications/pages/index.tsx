@@ -21,29 +21,16 @@ const notifications = {
   },
 }
 
-const lang = superstate('en')
-
 export default function Index() {
-  useSuperState(lang)
   useSuperState(notifications.state)
 
   return (
     <div className='flex flex-col gap-4 p-10'>
       <div className='flex items-center justify-between w-full'>
         <button
-          onClick={() =>
-            notifications.notify(
-              lang.now() === 'en' ? 'Hello world' : 'Olá mundo'
-            )
-          }
+          onClick={() => notifications.notify('Hello world!')}
           className='p-4 font-bold bg-blue-500 w-fit rounded-xl'>
-          {lang.now() === 'en' ? 'Notify' : 'Notificar'}
-        </button>
-
-        <button
-          onClick={() => lang.set((prev) => (prev === 'en' ? 'pt' : 'en'))}
-          className='p-4 font-bold bg-blue-500 w-fit rounded-xl'>
-          {lang.now()}
+          Notify
         </button>
       </div>
 
@@ -62,16 +49,6 @@ export default function Index() {
       )}
     </div>
   )
-}
-
-export async function getServerSideProps() {
-  return {
-    props: {
-      superstate: {
-        lang: 'pt',
-      },
-    },
-  }
 }
 
 interface Notification {

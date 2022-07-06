@@ -16,6 +16,8 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
+      "@/util": ["packages/util/src/index.ts"],
+      "@superstate/adapters": ["packages/adapters/src/index.ts"],
       "@superstate/core": ["packages/core/src/index.ts"],
       "@superstate/react": ["packages/react/src/index.ts"]
     }

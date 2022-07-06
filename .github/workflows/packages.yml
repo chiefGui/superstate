@@ -34,40 +34,40 @@ jobs:
         node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        persist-credentials: false
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
-    - name: Setup Node.js environment
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16
-        registry-url: https://registry.npmjs.org/
-        scope: '@superstate'
-        cache: 'npm'
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: https://registry.npmjs.org/
+          scope: '@superstate'
+          cache: 'npm'
 
-    - name: Nx set SHAs
-      uses: nrwl/nx-set-shas@v2.0.2
+      - name: Nx set SHAs
+        uses: nrwl/nx-set-shas@v2.0.2
 
-    - name: Install dependencies
-      run: yarn install --frozen-lockfile
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-    - name: Lint
-      run: npx nx affected --target=lint --parallel=3
+      - name: Lint
+        run: npx nx affected --target=lint --parallel=3
 
-    - name: Test
-      run: npx nx affected --target=test --parallel=3
+      - name: Test
+        run: npx nx affected --target=test --parallel=3
 
-    - name: Create Release Pull Request
-      id: changesets
-      uses: changesets/action@v1
-      with:
-        publish: npx nx affected --target=release --parallel=3
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        YARN_TOKEN: ${{ secrets.YARN_TOKEN }}
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create Release Pull Request
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: npx nx affected --target=release --parallel=3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          YARN_TOKEN: ${{ secrets.YARN_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -426,3 +426,5 @@ type IMiddlewareEventType =
   | 'after:broadcast:now'
   | 'before:broadcast:draft'
   | 'after:broadcast:draft'
+  | 'before:register'
+  | 'after:register'
