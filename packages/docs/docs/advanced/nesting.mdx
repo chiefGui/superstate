@@ -13,45 +13,50 @@ import { superstate } from '@superstate/core'
 const hp = superstate(100)
 const hero = superstate({ attributes: { hp } })
 
-hero.now().attributes.hp.set(prev => prev - 50)
+hero.now().attributes.hp.set((prev) => prev - 50)
 ```
 
-You can use [Extensions](/getting-started/extensions) to make your life easier by creating handy helper functions:
+To make you life easier, you can create helper functions:
 
 ```tsx
-const hp =
-  superstate(100)
-    .extend({
-      increase({ set }, amount: number) {
-        set(prev => prev + amount)
-      },
+const attributes = { hp: attribute(100) }
 
-      decrease({ set }, amount: number) {
-        set(prev => prev - amount)
-      },
-    })
+function attribute(initial: number) {
+  const state = superstate(initial)
 
-const attributes = { hp }
+  function decrease(amount: number) {
+    state.set((prev) => prev - amount)
+  },
 
-const hero =
-  superstate({ attributes })
-    .extend({
-      get({ now }, attributeKey: keyof typeof attributes) {
-        return now()[attributeKey].now()
-      },
+  function increase(amount: number) {
+    state.set((prev) => prev + amount)
+  }
 
-      heal({ set, now }, amount: number) {
-        now().attributes.hp.increase(amount)
-      },
+  function now() {
+    return state.now()
+  }
 
-      takeDamage({ set, now }, amount: number) {
-        now().attribuets.hp.decrease(amount)
-      },
-    })
+  return { decrease, increase, now }
+}
+
+const hero = {
+  state: superstate({ attributes }),
+
+  getAttribute(key: keyof typeof attributes) {
+    return hero.state.now().attributes[key]
+  }
+
+  heal(amount: number) {
+    hero.getAttribute('hp').increase(amount)
+  },
+
+  takeDamage(amount: number) {
+    hero.getAttribute('hp').decrease(amount)
+  }
+}
 
 hero.takeDamage(50)
 hero.heal(25)
 
-console.log(hero.get('hp'))
+console.log(hero.get('hp')) // 75
 ```
-

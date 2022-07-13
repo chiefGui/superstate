@@ -15,8 +15,8 @@ import { superstate } from '@superstate/core'
 
 const count = superstate(0)
 
-count.subscribe(newNow => {
-  console.log(newNow)
+count.subscribe((newCount) => {
+  console.log(newCount)
 })
 ```
 
@@ -26,12 +26,12 @@ And then, if you set something:
 count.set(1)
 ```
 
-The `console.log(newNow)` will be called.
+The `console.log(newCount)` will be called.
 
 By default, your subscriptions will target changes made to `now`. If you want to listen for changes made to the [draft](/getting-started/drafts):
 
 ```ts {3}
-count.subscribe(newDraft => {
+count.subscribe((newDraft) => {
   console.log(newDraft)
 }, 'draft') // pay attention to the 'draft' here
 ```
@@ -39,7 +39,7 @@ count.subscribe(newDraft => {
 In case you'd like to listen to changes made to both states, `now` and `draft`:
 
 ```ts {3}
-count.subscribe(newDraft => {
+count.subscribe((newDraft) => {
   console.log(newDraft)
 }, 'all') // pay attention to the 'all' here
 ```
@@ -53,8 +53,8 @@ If your subscription is targeting a `draft`, only changes made via `.sketch()` w
 If you are not interested in changes anymore, you can call the function returned from `subscribe`:
 
 ```ts
-const unsubscribe = count.subscribe(newNow => {
-  console.log(newNow)
+const unsubscribe = count.subscribe((newCount) => {
+  console.log(newCount)
 })
 
 // do whatever you want

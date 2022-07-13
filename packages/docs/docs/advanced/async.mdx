@@ -1,0 +1,54 @@
+# Async
+
+Currently, **superstate** does not have anything built-in to automate the work with asynchronous data.
+This is an intentional decision because I believe it may not be needed at all.
+
+Allow me to clarify. I don't think this:
+
+```ts
+const count = superstate(0)
+
+async function init() {
+  const response = await API.get('/count')
+
+  count.set(response.count)
+}
+
+init()
+```
+
+Is worse than this:
+
+```ts
+// For those who skipped the text on this page:
+// the snippet below DOES NOT work!
+// Please, read the page to understand why.
+
+const count = superstate(async () => await API.get('count'))
+```
+
+And if you go a little creative, you can have a wonderful, explicit API:
+
+```ts
+const count = {
+  state: superstate(0),
+
+  sync() {
+    const response = await API.get('/count')
+
+    this.state.set(response.count)
+  },
+}
+
+function init() {
+  count.sync()
+}
+
+init()
+```
+
+You know, I don't think something is being lost by skipping built-in async state. Of course we have more lines of code,
+but is it really that bad? Also, it may be worth mentioning that a long-term goal of **superstate** is
+[to always favor explicitness over implicitness](/about/goals), and this often means more lines of code.
+But that's not necessarily a bad thing though&mdash;in this case, having full control and understanding of the code
+around your state totally pays off.

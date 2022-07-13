@@ -15,6 +15,7 @@ the first argument is the current value of your state and making its return to b
 your state to be.
 
 ❌ **Don't:**
+
 ```typescript
 const count = superstate(0)
 
@@ -22,45 +23,52 @@ count.set(count.now() + 1)
 ```
 
 ✅ **Do:**
+
 ```typescript
 const count = superstate(0)
 
-count.set(prev => prev + 1)
+count.set((prev) => prev + 1)
 ```
 
 ## Abstract complex logic with Extensions
 
 It's tempting to just rush and use the built-in methods to handle your state. They work. However, it may become unsustainable at some point if
-you don't abstract complex, not obvious logic into small, organized pieces. [Extensions](/getting-started/extensions) are here for you.
+you don't abstract complex, not obvious logic into small, organized pieces. [Extensions](/advanced/extensions) are here for you.
 
 ❌ **Don't:**
-```typescript
-const user = superstate({ firstName: 'John', lastName: 'Doe', slug: 'john-doe' })
 
-user.set(prev => ({
+```typescript
+const user = superstate({
+  firstName: 'John',
+  lastName: 'Doe',
+  slug: 'john-doe',
+})
+
+user.set((prev) => ({
   ...prev,
 
   firstName: 'Hello',
   lastName: 'World',
-  slug: slugify('Hello World')
+  slug: slugify('Hello World'),
 }))
 ```
 
 ✅ **Do:**
+
 ```typescript
-function rename({ set }, { firstName, lastName }) {
-  set(prev => {
-    ...prev,
+const user = {
+  state: superstate({ firstName: 'John', lastName: 'Doe', slug: 'john-doe' }),
 
-    firstName,
-    lastName,
-    slug: slugify(`${firstName} ${lastName}`)
-  })
+  rename({ firstName, lastName }) {
+    user.state.set(prev => {
+      ...prev,
+
+      firstName,
+      lastName,
+      slug: slugify(`${firstName} ${lastName}`)
+    })
+  }
 }
-
-const user =
-  superstate({ firstName: 'John', lastName: 'Doe', slug: 'john-doe' })
-    .extend({ rename })
 
 user.rename({ firstName: 'Hello', lastName: 'World' })
 ```
@@ -77,6 +85,7 @@ in an unopinionated fashion. For example, [localStorage persistency](/advanced/l
 possible out of the box if data was not serializable. [Learn more.](https://en.wikipedia.org/wiki/Serialization)
 
 ❌ **Don't:**
+
 ```ts {5-7}
 const user = superstate({
   firstName: 'John',
@@ -84,19 +93,22 @@ const user = superstate({
   slug: 'john-doe',
   save() {
     // Your save function.
-  }
+  },
 })
 ```
 
 ✅ **Do:**
-```ts {1,2,3,9}
-function save() {
-  // Your save function.
-}
 
-const user = superstate({
-  firstName: 'John',
-  lastName: 'Doe',
-  slug: 'john-doe'
-}).extend({ save })
+```ts {8-10}
+const user = {
+  state: superstate({
+    firstName: 'John',
+    lastName: 'Doe',
+    slug: 'john-doe',
+  }),
+
+  save() {
+    // Your save function.
+  },
+}
 ```

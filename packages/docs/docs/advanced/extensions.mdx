@@ -3,6 +3,7 @@ sidebar_position: 4
 ---
 
 # Extensions
+
 When you feel like you're repeating yourself too much or just want to have standard ways to change the value of a
 **superstate**, then it's time for extensions!
 
@@ -21,7 +22,7 @@ count.set(1)
 Increasing the value of it is very straightforward as well:
 
 ```typescript
-count.set(prev => prev + 1)
+count.set((prev) => prev + 1)
 ```
 
 But wouldn't it be magical if you could do the following?:
@@ -46,8 +47,8 @@ From the example above, to create an extension that sums your `count`:
 ```ts {1-5}
 const count = superstate(0).extend({
   sum({ set }, amount: number) {
-    set(prev => prev + amount)
-  }
+    set((prev) => prev + amount)
+  },
 })
 
 count.sum(1) // `count.now()` will log 1
@@ -112,9 +113,9 @@ console.log(`${user.now().firstName} ${user.now().lastName}`)
 Extensions got you covered by allowing computed values. Let's see how it works:
 
 ```typescript
-const user =
-  superstate({ firstName: 'John', lastName: 'Doe' })
-    .extend({ fullName })
+const user = superstate({ firstName: 'John', lastName: 'Doe' }).extend({
+  fullName,
+})
 
 function fullName({ now }) {
   const _user = now()
@@ -137,7 +138,6 @@ function formatted({ now, draft }) {
 console.log(money.formatted()) // logs $100
 ```
 
-
 ## Side effects
 
 You can also handle side effects within your extension's scope:
@@ -150,7 +150,7 @@ const count = superstate(0).extend({
 
     // Feel free to do whatever you like.
     alert(`count has changed to ${next}.`)
-  }
+  },
 })
 ```
 
