@@ -1,6 +1,6 @@
 {
   "name": "@superstate/adapters",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Adapters to use with superstate",
   "main": "src/index.ts",
   "publishConfig": {

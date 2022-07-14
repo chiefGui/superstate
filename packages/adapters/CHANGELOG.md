@@ -1,5 +1,11 @@
 # @superstate/core
 
+## 0.1.2
+
+### Patch Changes
+
+- d1689a3: Add fallback for SSR applications with proper developer messaging.
+
 ## 0.0.8
 
 ### Patch Changes
