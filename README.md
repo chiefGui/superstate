@@ -1,6 +1,7 @@
 <div align="center">
 
-   _Is it a bird? Is it a plane? No, it is **superstate**!_
+_Is it a bird? Is it a plane? No, it is **superstate**!_
+
 </div>
 
 ![superstate hero](https://i.imgur.com/EhecV7G.png)
@@ -23,7 +24,7 @@ yarn add @superstate/core
 #### ✨ **Simple, sleek & elegant API**
 
 ```ts
-import { superstate } from '@superstate/core'
+import { superstate } from "@superstate/core"
 
 const count = superstate(0)
 
@@ -38,20 +39,20 @@ _Yep, that simple. No PhD required._
 
 ```ts
 // count.ts
-import { superstate } from '@superstate/core'
+import { superstate } from "@superstate/core"
 
 export const count = superstate(0)
 
 // calculator.ts
-import { count } from './count.ts'
+import { count } from "./count.ts"
 
 count.set(5)
 
 // app.ts
-import { count } from './count.ts'
+import { count } from "./count.ts"
 
 // When calculator.ts changes count, it'll call the callback below! :D
-count.subscribe(value => {
+count.subscribe((value) => {
   console.log(value)
 })
 ```
@@ -64,7 +65,7 @@ _The trick is the `export` keyword: to share your state, all you have to do is e
 
 #### 🧩 Fully extensible
 
-Instead of building **superstate** with lots of useless opinionated features, the idea is to give you the tools to expand it as much as you need&mdash;and only *when* you need. Middlewares and Extensions are at your service.
+Instead of building **superstate** with lots of useless opinionated features, the idea is to give you the tools to expand it as much as you need&mdash;and only _when_ you need. Middlewares and Extensions are at your service.
 
 #### 📝 Built-in Drafts System
 
@@ -84,7 +85,7 @@ console.log(count.now()) // 5
 
 #### 🤘 Simple enough for prototypes and scalable enough for the world's next big thing
 
-Regardless of the scale of your project, **superstate** *will* fit. It is small and simple. If your application hits big, **superstate** will follow along. If you already have an ongoing application, **superstate** can be incrementally adopted, so don't worry of implementing it after the first rail was already built.
+Regardless of the scale of your project, **superstate** _will_ fit. It is very compact for prototypes, but if your app hits big, **superstate** follows along. Have an ongoing application? It's all right&mdash;**superstate** can be incrementally adopted so you don't have to worry if the first rails are already built.
 
 #### ⌨️ Proudly written in TypeScript
 
@@ -115,10 +116,6 @@ You read it right: calling the `useSuperState(count)` hook is all you need to ma
 #### 🌐 Works in the browser or in Node environments
 
 Browser-only apps, hybrid apps (such as [Electron](https://www.electronjs.org/)), Node apps... check, check, check!
-
-#### ✅ SSR-ready
-
-Don't stress about `import { superstate } from '@superstate/core'` in your SSR applications&mdash;**superstate** just works and don't require you to put ifs to check whether you're in the browser or in a node environment.
 
 ---
 

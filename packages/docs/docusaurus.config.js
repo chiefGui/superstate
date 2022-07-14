@@ -5,9 +5,9 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula')
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'superstate docs',
-  tagline: 'The documentation for superstate',
-  url: 'https://docs.superstate.dev',
+  title: 'superstate',
+  tagline: 'The documentation page for superstate',
+  url: 'https://superstate.dev',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
