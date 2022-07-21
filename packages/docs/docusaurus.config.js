@@ -14,12 +14,15 @@ const config = {
   favicon: 'img/favicon.ico',
   organizationName: 'chiefGui', // Usually your GitHub org/user name.
   projectName: 'superstate', // Usually your repo name.
-
   presets: [
     [
       'classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
+        gtag: {
+          trackingID: 'G-18MWTG0Y0T',
+          anonymizeIP: true,
+        },
         docs: {
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
