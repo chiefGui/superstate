@@ -36,7 +36,7 @@ const count = {
   sync() {
     const response = await API.get('/count')
 
-    this.state.set(response.count)
+    count.state.set(response.count)
   },
 }
 
