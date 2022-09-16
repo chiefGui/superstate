@@ -122,3 +122,5 @@ Browser-only apps, hybrid apps (such as [Electron](https://www.electronjs.org/))
 #### Brought to you by 🇧🇷 [Guilherme "chiefGui" Oderdenge](https://github.com/chiefGui).
 
 ---
+
+Free licence :- LICENCE.md
