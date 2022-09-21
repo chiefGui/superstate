@@ -16,7 +16,7 @@ const hero = superstate({ attributes: { hp } })
 hero.now().attributes.hp.set((prev) => prev - 50)
 ```
 
-To make you life easier, you can create helper functions:
+To make your life easier, you can create helper functions:
 
 ```tsx
 const attributes = { hp: attribute(100) }
